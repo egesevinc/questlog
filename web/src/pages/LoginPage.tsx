@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { login } from '../api/auth'
 import { useAuth } from '../auth/AuthContext'
-import { isAxiosError } from 'axios'
+import { getErrorMessage } from '../api/errors'
 
 export function LoginPage() {
   const [emailOrUsername, setEmailOrUsername] = useState('')
@@ -21,10 +21,7 @@ export function LoginPage() {
       setSession(auth)
       navigate('/')
     } catch (err) {
-      const message = isAxiosError(err)
-        ? (err.response?.data?.message ?? 'Invalid credentials')
-        : 'Something went wrong'
-      setError(message)
+      setError(getErrorMessage(err, 'Invalid credentials'))
     } finally {
       setLoading(false)
     }

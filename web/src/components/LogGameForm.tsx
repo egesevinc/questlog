@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { createLog, type LogStatus } from '../api/logs'
+import { getErrorMessage } from '../api/errors'
 
 const STATUSES: LogStatus[] = ['Wishlist', 'Backlog', 'Playing', 'Completed', 'Abandoned', 'Replaying']
 
@@ -32,8 +33,8 @@ export function LogGameForm({ igdbId, onSaved, onCancel }: Props) {
         reviewBody: reviewBody.trim() || null,
       })
       onSaved()
-    } catch {
-      setError('Could not save the log.')
+    } catch (err) {
+      setError(getErrorMessage(err, 'Could not save the log.'))
     } finally {
       setSaving(false)
     }

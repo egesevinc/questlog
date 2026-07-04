@@ -4,24 +4,26 @@ import { getGame, type GameDetail } from '../api/games'
 import { getMyLists, addListItem, type GameListSummary } from '../api/lists'
 import { useAuth } from '../auth/AuthContext'
 import { LogGameForm } from '../components/LogGameForm'
+import { getErrorMessage } from '../api/errors'
 
 export function GameDetailPage() {
   const { igdbId } = useParams<{ igdbId: string }>()
   const { user } = useAuth()
   const [game, setGame] = useState<GameDetail | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [showLogForm, setShowLogForm] = useState(false)
   const [saved, setSaved] = useState(false)
   const [lists, setLists] = useState<GameListSummary[]>([])
   const [addedToList, setAddedToList] = useState<string | null>(null)
+  const [listError, setListError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!igdbId) return
     setLoading(true)
     getGame(Number(igdbId))
       .then(setGame)
-      .catch(() => setError('Could not load this game.'))
+      .catch(() => setLoadError('Could not load this game.'))
       .finally(() => setLoading(false))
   }, [igdbId])
 
@@ -31,16 +33,17 @@ export function GameDetailPage() {
 
   const handleAddToList = async (listId: string) => {
     if (!game) return
+    setListError(null)
     try {
       await addListItem(listId, game.igdbId)
       setAddedToList(listId)
-    } catch {
-      setError('Could not add to that list.')
+    } catch (err) {
+      setListError(getErrorMessage(err, 'Could not add to that list.'))
     }
   }
 
   if (loading) return <p className="text-text-muted">Loading…</p>
-  if (error || !game) return <p className="text-red-400">{error ?? 'Game not found.'}</p>
+  if (loadError || !game) return <p className="text-red-400">{loadError ?? 'Game not found.'}</p>
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-8">
@@ -96,6 +99,7 @@ export function GameDetailPage() {
                 </button>
               ))}
             </div>
+            {listError && <p className="text-sm text-red-400 mt-2">{listError}</p>}
           </div>
         )}
       </div>

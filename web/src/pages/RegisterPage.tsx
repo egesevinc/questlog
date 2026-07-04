@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { register } from '../api/auth'
 import { useAuth } from '../auth/AuthContext'
-import { isAxiosError } from 'axios'
+import { getErrorMessage } from '../api/errors'
 
 export function RegisterPage() {
   const [username, setUsername] = useState('')
@@ -22,10 +22,7 @@ export function RegisterPage() {
       setSession(auth)
       navigate('/')
     } catch (err) {
-      const message = isAxiosError(err)
-        ? (err.response?.data?.message ?? 'Registration failed')
-        : 'Something went wrong'
-      setError(message)
+      setError(getErrorMessage(err, 'Registration failed'))
     } finally {
       setLoading(false)
     }
