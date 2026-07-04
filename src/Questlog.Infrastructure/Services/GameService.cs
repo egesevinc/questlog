@@ -94,7 +94,11 @@ public class GameService : IGameService
         var resolved = new List<Genre>();
         foreach (var n in names)
         {
-            var genre = await _db.Genres.FirstOrDefaultAsync(g => g.IgdbId == n.IgdbId, ct);
+            // Check tracked-but-unsaved entities first: a search batches many games into
+            // one SaveChanges call, so a shared genre may already be pending from an
+            // earlier game in this same batch and won't be visible to a DB query yet.
+            var genre = _db.Genres.Local.FirstOrDefault(g => g.IgdbId == n.IgdbId)
+                ?? await _db.Genres.FirstOrDefaultAsync(g => g.IgdbId == n.IgdbId, ct);
             if (genre is null)
             {
                 genre = new Genre { IgdbId = n.IgdbId, Name = n.Name };
@@ -110,7 +114,8 @@ public class GameService : IGameService
         var resolved = new List<Platform>();
         foreach (var n in names)
         {
-            var platform = await _db.Platforms.FirstOrDefaultAsync(p => p.IgdbId == n.IgdbId, ct);
+            var platform = _db.Platforms.Local.FirstOrDefault(p => p.IgdbId == n.IgdbId)
+                ?? await _db.Platforms.FirstOrDefaultAsync(p => p.IgdbId == n.IgdbId, ct);
             if (platform is null)
             {
                 platform = new Platform { IgdbId = n.IgdbId, Name = n.Name, Abbreviation = n.Abbreviation };

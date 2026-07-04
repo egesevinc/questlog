@@ -12,6 +12,11 @@ using Questlog.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
+
 // --- Infrastructure (DbContext, IGDB, services) ---
 builder.Services.AddInfrastructure(builder.Configuration);
 
