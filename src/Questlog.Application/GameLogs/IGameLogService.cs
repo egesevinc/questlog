@@ -1,0 +1,10 @@
+namespace Questlog.Application.GameLogs;
+
+public interface IGameLogService
+{
+    Task<GameLogDto> CreateAsync(CreateGameLogRequest request, CancellationToken ct = default);
+    Task<GameLogDto?> UpdateAsync(Guid logId, UpdateGameLogRequest request, CancellationToken ct = default);
+    Task<bool> DeleteAsync(Guid logId, CancellationToken ct = default);
+    Task<IReadOnlyList<GameLogDto>> GetForUserAsync(Guid userId, CancellationToken ct = default);
+    Task<ProfileStatsDto> GetProfileStatsAsync(Guid userId, CancellationToken ct = default);
+}

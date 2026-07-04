@@ -1,0 +1,29 @@
+# Build output
+bin/
+obj/
+out/
+*.user
+
+# .NET
+project.lock.json
+artifacts/
+
+# Secrets (never commit)
+appsettings.*.Local.json
+secrets.json
+.env
+
+# IDE
+.vs/
+.idea/
+*.swp
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+
+# OS
+.DS_Store
+Thumbs.db
+.claude/

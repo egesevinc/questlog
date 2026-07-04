@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: questlog
+      POSTGRES_USER: questlog
+      POSTGRES_PASSWORD: questlog
+    ports:
+      - "5432:5432"
+    volumes:
+      - questlog_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U questlog"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: src/Questlog.Api/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__Default: "Host=db;Port=5432;Database=questlog;Username=questlog;Password=questlog"
+      Jwt__Secret: "${JWT_SECRET:-dev-only-secret-change-me-at-least-32-chars}"
+      Igdb__ClientId: "${IGDB_CLIENT_ID}"
+      Igdb__ClientSecret: "${IGDB_CLIENT_SECRET}"
+      Cors__Origin: "http://localhost:5173"
+      ASPNETCORE_ENVIRONMENT: "Development"
+    ports:
+      - "8080:8080"
+
+volumes:
+  questlog_pgdata:
