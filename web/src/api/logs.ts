@@ -9,6 +9,8 @@ export interface CreateGameLogRequest {
   hoursPlayed: number | null
   startedAt: string | null
   finishedAt: string | null
+  reviewBody?: string | null
+  containsSpoilers?: boolean
 }
 
 export type UpdateGameLogRequest = Omit<CreateGameLogRequest, 'igdbId'>
@@ -24,6 +26,8 @@ export interface GameLog {
   startedAt: string | null
   finishedAt: string | null
   createdAt: string
+  reviewBody: string | null
+  containsSpoilers: boolean
 }
 
 export interface GenreCount {

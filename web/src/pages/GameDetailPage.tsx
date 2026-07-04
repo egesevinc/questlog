@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { getGame, type GameDetail } from '../api/games'
+import { getMyLists, addListItem, type GameListSummary } from '../api/lists'
 import { useAuth } from '../auth/AuthContext'
 import { LogGameForm } from '../components/LogGameForm'
 
@@ -12,6 +13,8 @@ export function GameDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [showLogForm, setShowLogForm] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [lists, setLists] = useState<GameListSummary[]>([])
+  const [addedToList, setAddedToList] = useState<string | null>(null)
 
   useEffect(() => {
     if (!igdbId) return
@@ -21,6 +24,20 @@ export function GameDetailPage() {
       .catch(() => setError('Could not load this game.'))
       .finally(() => setLoading(false))
   }, [igdbId])
+
+  useEffect(() => {
+    if (user) getMyLists().then(setLists).catch(() => {})
+  }, [user])
+
+  const handleAddToList = async (listId: string) => {
+    if (!game) return
+    try {
+      await addListItem(listId, game.igdbId)
+      setAddedToList(listId)
+    } catch {
+      setError('Could not add to that list.')
+    }
+  }
 
   if (loading) return <p className="text-text-muted">Loading…</p>
   if (error || !game) return <p className="text-red-400">{error ?? 'Game not found.'}</p>
@@ -62,6 +79,24 @@ export function GameDetailPage() {
             }}
             onCancel={() => setShowLogForm(false)}
           />
+        )}
+
+        {user && lists.length > 0 && (
+          <div className="mt-6">
+            <p className="text-sm text-text-muted mb-2">Add to a list</p>
+            <div className="flex flex-wrap gap-2">
+              {lists.map((list) => (
+                <button
+                  key={list.id}
+                  onClick={() => handleAddToList(list.id)}
+                  disabled={addedToList === list.id}
+                  className="text-sm bg-surface border border-border rounded px-3 py-1.5 hover:border-accent transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  {addedToList === list.id ? 'Added ✓' : list.title}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     </div>

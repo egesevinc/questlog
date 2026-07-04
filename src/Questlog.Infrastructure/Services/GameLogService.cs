@@ -50,6 +50,17 @@ public class GameLogService : IGameLogService
             FinishedAt = request.FinishedAt
         };
         _db.GameLogs.Add(log);
+
+        if (!string.IsNullOrWhiteSpace(request.ReviewBody))
+        {
+            log.Review = new Review
+            {
+                UserId = userId,
+                Body = request.ReviewBody,
+                ContainsSpoilers = request.ContainsSpoilers
+            };
+        }
+
         await _db.SaveChangesAsync(ct);
 
         return ToDto(log, game);
@@ -60,7 +71,7 @@ public class GameLogService : IGameLogService
         var userId = RequireUserId();
         ValidateRating(request.Rating);
 
-        var log = await _db.GameLogs.Include(l => l.Game)
+        var log = await _db.GameLogs.Include(l => l.Game).Include(l => l.Review)
             .FirstOrDefaultAsync(l => l.Id == logId, ct);
         if (log is null) return null;
         if (log.UserId != userId) throw AppException.Unauthorized("This log doesn't belong to you.");
@@ -71,6 +82,27 @@ public class GameLogService : IGameLogService
         log.StartedAt = request.StartedAt;
         log.FinishedAt = request.FinishedAt;
         log.UpdatedAt = DateTimeOffset.UtcNow;
+
+        if (string.IsNullOrWhiteSpace(request.ReviewBody))
+        {
+            if (log.Review is not null)
+                _db.Reviews.Remove(log.Review);
+        }
+        else if (log.Review is null)
+        {
+            log.Review = new Review
+            {
+                UserId = userId,
+                Body = request.ReviewBody,
+                ContainsSpoilers = request.ContainsSpoilers
+            };
+        }
+        else
+        {
+            log.Review.Body = request.ReviewBody;
+            log.Review.ContainsSpoilers = request.ContainsSpoilers;
+            log.Review.UpdatedAt = DateTimeOffset.UtcNow;
+        }
 
         await _db.SaveChangesAsync(ct);
         return ToDto(log, log.Game);
@@ -93,10 +125,13 @@ public class GameLogService : IGameLogService
         return await _db.GameLogs
             .Where(l => l.UserId == userId)
             .Include(l => l.Game)
+            .Include(l => l.Review)
             .OrderByDescending(l => l.CreatedAt)
             .Select(l => new GameLogDto(
                 l.Id, l.Game.IgdbId, l.Game.Name, l.Game.CoverUrl,
-                l.Status, l.Rating, l.HoursPlayed, l.StartedAt, l.FinishedAt, l.CreatedAt))
+                l.Status, l.Rating, l.HoursPlayed, l.StartedAt, l.FinishedAt, l.CreatedAt,
+                l.Review != null ? l.Review.Body : null,
+                l.Review != null && l.Review.ContainsSpoilers))
             .ToListAsync(ct);
     }
 
@@ -141,5 +176,6 @@ public class GameLogService : IGameLogService
 
     private static GameLogDto ToDto(GameLog l, Game g) => new(
         l.Id, g.IgdbId, g.Name, g.CoverUrl,
-        l.Status, l.Rating, l.HoursPlayed, l.StartedAt, l.FinishedAt, l.CreatedAt);
+        l.Status, l.Rating, l.HoursPlayed, l.StartedAt, l.FinishedAt, l.CreatedAt,
+        l.Review?.Body, l.Review?.ContainsSpoilers ?? false);
 }

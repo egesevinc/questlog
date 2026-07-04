@@ -26,6 +26,9 @@ export function Layout() {
                 <Link to="/logs" className="text-text-muted hover:text-text transition-colors">
                   My Logs
                 </Link>
+                <Link to="/lists" className="text-text-muted hover:text-text transition-colors">
+                  Lists
+                </Link>
                 <span className="text-text-muted">{user.username}</span>
                 <button
                   onClick={handleLogout}

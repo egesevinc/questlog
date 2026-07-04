@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Questlog.Application.Auth;
 using Questlog.Application.Games;
+using Questlog.Application.GameLists;
 using Questlog.Application.GameLogs;
 using Questlog.Application.Igdb;
 using Questlog.Infrastructure.Auth;
@@ -45,6 +46,7 @@ public static class DependencyInjection
         // --- Domain services ---
         services.AddScoped<IGameService, GameService>();
         services.AddScoped<IGameLogService, GameLogService>();
+        services.AddScoped<IGameListService, GameListService>();
 
         return services;
     }

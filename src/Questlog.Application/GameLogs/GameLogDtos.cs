@@ -8,14 +8,18 @@ public record CreateGameLogRequest(
     int? Rating,
     int? HoursPlayed,
     DateTimeOffset? StartedAt,
-    DateTimeOffset? FinishedAt);
+    DateTimeOffset? FinishedAt,
+    string? ReviewBody = null,
+    bool ContainsSpoilers = false);
 
 public record UpdateGameLogRequest(
     LogStatus Status,
     int? Rating,
     int? HoursPlayed,
     DateTimeOffset? StartedAt,
-    DateTimeOffset? FinishedAt);
+    DateTimeOffset? FinishedAt,
+    string? ReviewBody = null,
+    bool ContainsSpoilers = false);
 
 public record GameLogDto(
     Guid Id,
@@ -27,7 +31,9 @@ public record GameLogDto(
     int? HoursPlayed,
     DateTimeOffset? StartedAt,
     DateTimeOffset? FinishedAt,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    string? ReviewBody = null,
+    bool ContainsSpoilers = false);
 
 public record ProfileStatsDto(
     int TotalLogged,

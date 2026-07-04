@@ -13,6 +13,7 @@ export function LogGameForm({ igdbId, onSaved, onCancel }: Props) {
   const [status, setStatus] = useState<LogStatus>('Playing')
   const [rating, setRating] = useState('')
   const [hoursPlayed, setHoursPlayed] = useState('')
+  const [reviewBody, setReviewBody] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
@@ -28,6 +29,7 @@ export function LogGameForm({ igdbId, onSaved, onCancel }: Props) {
         hoursPlayed: hoursPlayed ? Number(hoursPlayed) : null,
         startedAt: null,
         finishedAt: null,
+        reviewBody: reviewBody.trim() || null,
       })
       onSaved()
     } catch {
@@ -75,6 +77,15 @@ export function LogGameForm({ igdbId, onSaved, onCancel }: Props) {
             className="bg-base border border-border rounded px-3 py-2 text-text focus:outline-none focus:border-accent"
           />
         </div>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label className="text-sm text-text-muted">Review (optional)</label>
+        <textarea
+          value={reviewBody}
+          onChange={(e) => setReviewBody(e.target.value)}
+          rows={3}
+          className="bg-base border border-border rounded px-3 py-2 text-text focus:outline-none focus:border-accent resize-none"
+        />
       </div>
       {error && <p className="text-sm text-red-400">{error}</p>}
       <div className="flex gap-2">
