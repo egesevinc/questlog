@@ -29,7 +29,12 @@ export function Layout() {
                 <Link to="/lists" className="text-text-muted hover:text-text transition-colors">
                   Lists
                 </Link>
-                <span className="text-text-muted">{user.username}</span>
+                <Link to="/people" className="text-text-muted hover:text-text transition-colors">
+                  People
+                </Link>
+                <Link to={`/profiles/${user.userId}`} className="text-text-muted hover:text-text transition-colors">
+                  {user.username}
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="text-text-muted hover:text-text transition-colors cursor-pointer"
