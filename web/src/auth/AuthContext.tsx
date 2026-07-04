@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from 'react'
 import type { AuthResponse } from '../api/auth'
+import { TOKEN_KEY, USER_KEY, clearSession } from './storage'
 
 interface AuthUser {
   userId: string
@@ -14,12 +15,16 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-const TOKEN_KEY = 'questlog_token'
-const USER_KEY = 'questlog_user'
-
 function loadUser(): AuthUser | null {
   const raw = localStorage.getItem(USER_KEY)
-  return raw ? (JSON.parse(raw) as AuthUser) : null
+  if (!raw) return null
+  try {
+    return JSON.parse(raw) as AuthUser
+  } catch {
+    // Corrupt/legacy value — drop it rather than crashing the whole app.
+    clearSession()
+    return null
+  }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -33,8 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = () => {
-    localStorage.removeItem(TOKEN_KEY)
-    localStorage.removeItem(USER_KEY)
+    clearSession()
     setUser(null)
   }
 
