@@ -91,18 +91,27 @@ User ──< GameLog >── Game >──< Genre
 
 ## API surface
 
-| Method | Route                              | Auth | Purpose                              |
-| ------ | ---------------------------------- | ---- | ------------------------------------ |
-| POST   | `/api/auth/register`               | —    | Create an account                    |
-| POST   | `/api/auth/login`                  | —    | Get a JWT                            |
-| GET    | `/api/games/search?q=`             | —    | Search games (proxied + cached)      |
-| GET    | `/api/games/{igdbId}`              | —    | Game details                         |
-| POST   | `/api/logs`                        | ✅   | Log a game                           |
-| PUT    | `/api/logs/{id}`                   | ✅   | Update a log                         |
-| DELETE | `/api/logs/{id}`                   | ✅   | Delete a log                         |
-| GET    | `/api/logs/me`                     | ✅   | The current user's logs              |
-| GET    | `/api/profiles/{userId}/stats`     | —    | Aggregated taste stats               |
-| GET    | `/api/profiles/{userId}/logs`      | —    | A user's public log grid             |
+| Method | Route                                | Auth | Purpose                              |
+| ------ | ------------------------------------ | ---- | ------------------------------------ |
+| POST   | `/api/auth/register`                 | —    | Create an account                    |
+| POST   | `/api/auth/login`                    | —    | Get a JWT                            |
+| GET    | `/api/games/search?q=`               | —    | Search games (proxied + cached)      |
+| GET    | `/api/games/{igdbId}`                | —    | Game details                         |
+| POST   | `/api/logs`                          | ✅   | Log a game (with optional review)    |
+| PUT    | `/api/logs/{id}`                     | ✅   | Update a log / its review            |
+| DELETE | `/api/logs/{id}`                     | ✅   | Delete a log                         |
+| GET    | `/api/logs/me`                       | ✅   | The current user's logs              |
+| GET    | `/api/lists/me`                      | ✅   | The current user's lists             |
+| POST   | `/api/lists`                         | ✅   | Create a list                        |
+| GET    | `/api/lists/{id}`                    | —    | A list with its items                |
+| PUT    | `/api/lists/{id}`                    | ✅   | Rename / edit a list                 |
+| DELETE | `/api/lists/{id}`                    | ✅   | Delete a list                        |
+| POST   | `/api/lists/{id}/items`              | ✅   | Add a game to a list                 |
+| DELETE | `/api/lists/{id}/items/{itemId}`     | ✅   | Remove a game from a list            |
+| PUT    | `/api/lists/{id}/items/order`        | ✅   | Reorder a list's items               |
+| GET    | `/api/profiles/search?q=`            | —    | Find users by username               |
+| GET    | `/api/profiles/{userId}/stats`       | —    | Aggregated taste stats               |
+| GET    | `/api/profiles/{userId}/logs`        | —    | A user's public log grid             |
 
 Full interactive docs via Swagger at `/swagger` in development.
 

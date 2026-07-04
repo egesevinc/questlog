@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Questlog.Domain.Enums;
 
 namespace Questlog.Application.GameLogs;
@@ -5,20 +6,20 @@ namespace Questlog.Application.GameLogs;
 public record CreateGameLogRequest(
     long IgdbId,
     LogStatus Status,
-    int? Rating,
-    int? HoursPlayed,
+    [Range(1, 10)] int? Rating,
+    [Range(0, 100_000)] int? HoursPlayed,
     DateTimeOffset? StartedAt,
     DateTimeOffset? FinishedAt,
-    string? ReviewBody = null,
+    [StringLength(10_000)] string? ReviewBody = null,
     bool ContainsSpoilers = false);
 
 public record UpdateGameLogRequest(
     LogStatus Status,
-    int? Rating,
-    int? HoursPlayed,
+    [Range(1, 10)] int? Rating,
+    [Range(0, 100_000)] int? HoursPlayed,
     DateTimeOffset? StartedAt,
     DateTimeOffset? FinishedAt,
-    string? ReviewBody = null,
+    [StringLength(10_000)] string? ReviewBody = null,
     bool ContainsSpoilers = false);
 
 public record GameLogDto(
