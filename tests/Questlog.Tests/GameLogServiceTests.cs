@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using NSubstitute;
+using Xunit;
 using Questlog.Application.Common;
 using Questlog.Application.GameLogs;
 using Questlog.Application.Games;

@@ -20,6 +20,12 @@ export function Layout() {
           <nav className="flex items-center gap-4 text-sm">
             {user ? (
               <>
+                <Link to="/search" className="text-text-muted hover:text-text transition-colors">
+                  Search
+                </Link>
+                <Link to="/logs" className="text-text-muted hover:text-text transition-colors">
+                  My Logs
+                </Link>
                 <span className="text-text-muted">{user.username}</span>
                 <button
                   onClick={handleLogout}

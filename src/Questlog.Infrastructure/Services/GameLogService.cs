@@ -114,14 +114,20 @@ public class GameLogService : IGameLogService
             .Select(l => (double?)l.Rating!.Value).AverageAsync(ct);
 
         // Top genres across the user's logged games.
-        var topGenres = await _db.GameLogs
+        // Grouped in memory: the many-to-many GroupBy can't be translated by
+        // every provider (e.g. EF Core's InMemory provider used in tests).
+        var genreNames = await _db.GameLogs
             .Where(l => l.UserId == userId)
             .SelectMany(l => l.Game.Genres)
-            .GroupBy(g => g.Name)
+            .Select(g => g.Name)
+            .ToListAsync(ct);
+
+        var topGenres = genreNames
+            .GroupBy(name => name)
             .Select(grp => new GenreCountDto(grp.Key, grp.Count()))
             .OrderByDescending(x => x.Count)
             .Take(5)
-            .ToListAsync(ct);
+            .ToList();
 
         return new ProfileStatsDto(total, completed, playing, backlog, abandoned,
             avg.HasValue ? Math.Round(avg.Value, 2) : null, topGenres);
