@@ -18,6 +18,7 @@ public record GameListItemDto(
 
 public record GameListDto(
     Guid Id,
+    Guid UserId,
     string Title,
     string? Description,
     bool IsPublic,

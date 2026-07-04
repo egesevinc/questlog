@@ -20,6 +20,7 @@ export interface GameListItem {
 
 export interface GameListDetail {
   id: string
+  userId: string
   title: string
   description: string | null
   isPublic: boolean

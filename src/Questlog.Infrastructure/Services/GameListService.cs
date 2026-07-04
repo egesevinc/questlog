@@ -149,7 +149,7 @@ public class GameListService : IGameListService
     }
 
     private static GameListDto ToDto(GameList l) => new(
-        l.Id, l.Title, l.Description, l.IsPublic, l.CreatedAt,
+        l.Id, l.UserId, l.Title, l.Description, l.IsPublic, l.CreatedAt,
         l.Items.OrderBy(i => i.Order).Select(i => new GameListItemDto(
             i.Id, i.Game.IgdbId, i.Game.Name, i.Game.CoverUrl, i.Order, i.Note)).ToList());
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getList, removeListItem, type GameListDetail } from '../api/lists'
 import { useAuth } from '../auth/AuthContext'
+import { getErrorMessage } from '../api/errors'
 
 export function ListDetailPage() {
   const { listId } = useParams<{ listId: string }>()
@@ -9,6 +10,7 @@ export function ListDetailPage() {
   const [list, setList] = useState<GameListDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [removeError, setRemoveError] = useState<string | null>(null)
 
   const load = () => {
     if (!listId) return
@@ -23,17 +25,25 @@ export function ListDetailPage() {
 
   const handleRemove = async (itemId: string) => {
     if (!listId) return
-    await removeListItem(listId, itemId)
-    load()
+    setRemoveError(null)
+    try {
+      await removeListItem(listId, itemId)
+      load()
+    } catch (err) {
+      setRemoveError(getErrorMessage(err, 'Could not remove that game.'))
+    }
   }
 
   if (loading) return <p className="text-text-muted">Loading…</p>
   if (error || !list) return <p className="text-red-400">{error ?? 'List not found.'}</p>
 
+  const isOwner = user?.userId === list.userId
+
   return (
     <div>
       <h1 className="text-2xl font-semibold text-text mb-1">{list.title}</h1>
       {list.description && <p className="text-text-muted mb-6">{list.description}</p>}
+      {removeError && <p className="text-sm text-red-400 mb-4">{removeError}</p>}
 
       {list.items.length === 0 ? (
         <p className="text-text-muted">
@@ -61,7 +71,7 @@ export function ListDetailPage() {
                   {item.gameName}
                 </p>
               </Link>
-              {user && (
+              {isOwner && (
                 <button
                   onClick={() => handleRemove(item.id)}
                   className="absolute top-1 right-1 bg-base/80 text-text-muted hover:text-red-400 text-xs rounded px-1.5 py-0.5 cursor-pointer"
