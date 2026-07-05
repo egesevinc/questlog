@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { getFeed, type FeedItem } from '../api/social'
 import { LikeButton } from '../components/LikeButton'
+import { LandingPage } from './LandingPage'
 
 export function HomePage() {
   const { user } = useAuth()
@@ -10,11 +11,18 @@ export function HomePage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (!user) {
+      setLoading(false)
+      return
+    }
     getFeed()
       .then(setFeed)
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [])
+  }, [user])
+
+  // Logged-out visitors get the marketing landing page instead of a login redirect.
+  if (!user) return <LandingPage />
 
   return (
     <div>

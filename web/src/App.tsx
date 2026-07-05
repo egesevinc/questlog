@@ -23,8 +23,9 @@ function App() {
         <Route path="/lists/:listId" element={<ListDetailPage />} />
         <Route path="/profiles/:userId" element={<ProfilePage />} />
         <Route path="/logs/:logId" element={<LogDetailPage />} />
+        {/* Public: shows the landing page when logged out, the feed when logged in. */}
+        <Route path="/" element={<HomePage />} />
         <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<GameSearchPage />} />
           <Route path="/logs" element={<MyLogsPage />} />
           <Route path="/lists" element={<ListsPage />} />
