@@ -1,32 +1,83 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getUserLogs, getUserStats, type GameLog, type ProfileStats } from '../api/logs'
+import { getFollowInfo, followUser, unfollowUser, type FollowInfo } from '../api/social'
+import { useAuth } from '../auth/AuthContext'
 
 export function ProfilePage() {
   const { userId } = useParams<{ userId: string }>()
+  const { user } = useAuth()
   const [stats, setStats] = useState<ProfileStats | null>(null)
   const [logs, setLogs] = useState<GameLog[]>([])
+  const [follow, setFollow] = useState<FollowInfo | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const isMe = user?.userId === userId
 
   useEffect(() => {
     if (!userId) return
     setLoading(true)
-    Promise.all([getUserStats(userId), getUserLogs(userId)])
-      .then(([s, l]) => {
+    Promise.all([getUserStats(userId), getUserLogs(userId), getFollowInfo(userId)])
+      .then(([s, l, f]) => {
         setStats(s)
         setLogs(l)
+        setFollow(f)
       })
       .catch(() => setError('Could not load this profile.'))
       .finally(() => setLoading(false))
   }, [userId])
+
+  const toggleFollow = async () => {
+    if (!userId || !follow) return
+    // Optimistic update, reverted on failure.
+    const next = !follow.isFollowedByMe
+    setFollow({
+      ...follow,
+      isFollowedByMe: next,
+      followerCount: follow.followerCount + (next ? 1 : -1),
+    })
+    try {
+      if (next) await followUser(userId)
+      else await unfollowUser(userId)
+    } catch {
+      setFollow(follow) // revert
+    }
+  }
 
   if (loading) return <p className="text-text-muted">Loading…</p>
   if (error || !stats) return <p className="text-red-400">{error ?? 'Profile not found.'}</p>
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-text mb-6">Profile</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold text-text">Profile</h1>
+        {user && !isMe && follow && (
+          <button
+            onClick={toggleFollow}
+            className={
+              follow.isFollowedByMe
+                ? 'text-sm border border-border rounded px-4 py-1.5 text-text-muted hover:text-text transition-colors cursor-pointer'
+                : 'text-sm bg-accent text-base rounded px-4 py-1.5 font-medium hover:bg-accent-hover transition-colors cursor-pointer'
+            }
+          >
+            {follow.isFollowedByMe ? 'Following' : 'Follow'}
+          </button>
+        )}
+      </div>
+
+      {follow && (
+        <div className="flex gap-6 mb-8 text-sm">
+          <span className="text-text">
+            <span className="font-semibold">{follow.followerCount}</span>{' '}
+            <span className="text-text-muted">followers</span>
+          </span>
+          <span className="text-text">
+            <span className="font-semibold">{follow.followingCount}</span>{' '}
+            <span className="text-text-muted">following</span>
+          </span>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-8">
         <Stat label="Logged" value={stats.totalLogged} />

@@ -137,6 +137,11 @@ public static class DbSeeder
         };
         db.GameLists.Add(top);
 
+        // --- Follows: the two demo users follow each other, so each feed has content ---
+        db.Follows.AddRange(
+            new Follow { Follower = link, Followee = zelda },
+            new Follow { Follower = zelda, Followee = link });
+
         await db.SaveChangesAsync(ct);
     }
 }

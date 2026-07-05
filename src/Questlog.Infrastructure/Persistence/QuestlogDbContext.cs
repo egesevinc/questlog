@@ -15,6 +15,7 @@ public class QuestlogDbContext : DbContext
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<GameList> GameLists => Set<GameList>();
     public DbSet<GameListItem> GameListItems => Set<GameListItem>();
+    public DbSet<Follow> Follows => Set<Follow>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -86,6 +87,22 @@ public class QuestlogDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(i => i.GameId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // --- Follows: one row per (follower, followee) ---
+        b.Entity<Follow>(e =>
+        {
+            e.HasIndex(f => new { f.FollowerId, f.FolloweeId }).IsUnique();
+
+            e.HasOne(f => f.Follower)
+                .WithMany(u => u.Following)
+                .HasForeignKey(f => f.FollowerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(f => f.Followee)
+                .WithMany(u => u.Followers)
+                .HasForeignKey(f => f.FolloweeId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
