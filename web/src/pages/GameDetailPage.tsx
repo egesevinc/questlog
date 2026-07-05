@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { getGame, type GameDetail } from '../api/games'
 import { getMyLists, addListItem, type GameListSummary } from '../api/lists'
+import { getMyLogForGame, deleteLog, type GameLog } from '../api/logs'
 import { useAuth } from '../auth/AuthContext'
 import { LogGameForm } from '../components/LogGameForm'
 import { getErrorMessage } from '../api/errors'
@@ -13,7 +14,7 @@ export function GameDetailPage() {
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [showLogForm, setShowLogForm] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [myLog, setMyLog] = useState<GameLog | null>(null)
   const [lists, setLists] = useState<GameListSummary[]>([])
   const [addedToList, setAddedToList] = useState<string | null>(null)
   const [listError, setListError] = useState<string | null>(null)
@@ -28,8 +29,22 @@ export function GameDetailPage() {
   }, [igdbId])
 
   useEffect(() => {
-    if (user) getMyLists().then(setLists).catch(() => {})
-  }, [user])
+    if (!user || !igdbId) return
+    getMyLogForGame(Number(igdbId)).then(setMyLog).catch(() => {})
+    getMyLists().then(setLists).catch(() => {})
+  }, [user, igdbId])
+
+  const reloadLog = () => {
+    if (!igdbId) return
+    getMyLogForGame(Number(igdbId)).then(setMyLog).catch(() => {})
+  }
+
+  const handleDeleteLog = async () => {
+    if (!myLog) return
+    await deleteLog(myLog.id)
+    setMyLog(null)
+    setShowLogForm(false)
+  }
 
   const handleAddToList = async (listId: string) => {
     if (!game) return
@@ -55,16 +70,15 @@ export function GameDetailPage() {
       <div>
         <h1 className="text-2xl font-semibold text-text mb-1">{game.name}</h1>
         {game.releaseDate && (
-          <p className="text-text-muted text-sm mb-4">
-            {new Date(game.releaseDate).getFullYear()}
-          </p>
+          <p className="text-text-muted text-sm mb-4">{new Date(game.releaseDate).getFullYear()}</p>
         )}
         {game.genres.length > 0 && (
           <p className="text-sm text-text-muted mb-4">{game.genres.join(' · ')}</p>
         )}
         {game.summary && <p className="text-text mb-6 leading-relaxed">{game.summary}</p>}
 
-        {user && !saved && !showLogForm && (
+        {/* No log yet, not editing → offer to log it. */}
+        {user && !myLog && !showLogForm && (
           <button
             onClick={() => setShowLogForm(true)}
             className="bg-accent text-base font-medium rounded px-4 py-2 hover:bg-accent-hover transition-colors cursor-pointer"
@@ -72,13 +86,48 @@ export function GameDetailPage() {
             Log this game
           </button>
         )}
-        {saved && <p className="text-accent text-sm">Logged!</p>}
+
+        {/* Existing log, not editing → show it with edit/delete. */}
+        {user && myLog && !showLogForm && (
+          <div className="bg-surface border border-border rounded p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-text font-medium">{myLog.status}</span>
+              {myLog.rating != null && (
+                <span className="text-accent font-semibold text-sm">{myLog.rating}/10</span>
+              )}
+            </div>
+            {myLog.hoursPlayed != null && (
+              <p className="text-sm text-text-muted mb-2">{myLog.hoursPlayed}h played</p>
+            )}
+            {myLog.reviewBody && (
+              <p className="text-text text-sm mb-3 leading-relaxed whitespace-pre-wrap">
+                {myLog.reviewBody}
+              </p>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowLogForm(true)}
+                className="text-sm bg-base border border-border rounded px-3 py-1.5 hover:border-accent transition-colors cursor-pointer"
+              >
+                Edit
+              </button>
+              <button
+                onClick={handleDeleteLog}
+                className="text-sm text-text-muted hover:text-red-400 transition-colors px-3 py-1.5 cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        )}
+
         {showLogForm && (
           <LogGameForm
             igdbId={game.igdbId}
+            existing={myLog}
             onSaved={() => {
               setShowLogForm(false)
-              setSaved(true)
+              reloadLog()
             }}
             onCancel={() => setShowLogForm(false)}
           />

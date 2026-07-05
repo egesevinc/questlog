@@ -55,6 +55,16 @@ export const deleteLog = (logId: string) => api.delete(`/api/logs/${logId}`)
 
 export const getMyLogs = () => api.get<GameLog[]>('/api/logs/me').then((r) => r.data)
 
+// The current user's log for a game, or null if they haven't logged it (404).
+export const getMyLogForGame = (igdbId: number) =>
+  api
+    .get<GameLog>(`/api/logs/game/${igdbId}`)
+    .then((r) => r.data)
+    .catch((err) => {
+      if (err?.response?.status === 404) return null
+      throw err
+    })
+
 export const getUserLogs = (userId: string) =>
   api.get<GameLog[]>(`/api/profiles/${userId}/logs`).then((r) => r.data)
 

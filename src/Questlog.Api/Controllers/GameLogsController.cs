@@ -45,4 +45,12 @@ public class GameLogsController : ControllerBase
         var userId = _currentUser.UserId!.Value;
         return Ok(await _logs.GetForUserAsync(userId, ct));
     }
+
+    /// <summary>The current user's log for a specific game, or 404 if not logged.</summary>
+    [HttpGet("game/{igdbId:long}")]
+    public async Task<ActionResult<GameLogDto>> GetMineForGame(long igdbId, CancellationToken ct)
+    {
+        var log = await _logs.GetMineForGameAsync(igdbId, ct);
+        return log is null ? NotFound() : Ok(log);
+    }
 }

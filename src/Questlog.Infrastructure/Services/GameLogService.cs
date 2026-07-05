@@ -135,6 +135,21 @@ public class GameLogService : IGameLogService
             .ToListAsync(ct);
     }
 
+    public async Task<GameLogDto?> GetMineForGameAsync(long igdbId, CancellationToken ct = default)
+    {
+        var userId = RequireUserId();
+        return await _db.GameLogs
+            .Where(l => l.UserId == userId && l.Game.IgdbId == igdbId)
+            .Include(l => l.Game)
+            .Include(l => l.Review)
+            .Select(l => new GameLogDto(
+                l.Id, l.Game.IgdbId, l.Game.Name, l.Game.CoverUrl,
+                l.Status, l.Rating, l.HoursPlayed, l.StartedAt, l.FinishedAt, l.CreatedAt,
+                l.Review != null ? l.Review.Body : null,
+                l.Review != null && l.Review.ContainsSpoilers))
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task<ProfileStatsDto> GetProfileStatsAsync(Guid userId, CancellationToken ct = default)
     {
         var logs = _db.GameLogs.Where(l => l.UserId == userId);

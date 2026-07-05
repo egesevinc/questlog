@@ -6,5 +6,8 @@ public interface IGameLogService
     Task<GameLogDto?> UpdateAsync(Guid logId, UpdateGameLogRequest request, CancellationToken ct = default);
     Task<bool> DeleteAsync(Guid logId, CancellationToken ct = default);
     Task<IReadOnlyList<GameLogDto>> GetForUserAsync(Guid userId, CancellationToken ct = default);
+
+    /// <summary>The current user's log for a given game, or null if they haven't logged it.</summary>
+    Task<GameLogDto?> GetMineForGameAsync(long igdbId, CancellationToken ct = default);
     Task<ProfileStatsDto> GetProfileStatsAsync(Guid userId, CancellationToken ct = default);
 }

@@ -1,37 +1,47 @@
 import { useState, type FormEvent } from 'react'
-import { createLog, type LogStatus } from '../api/logs'
+import { createLog, updateLog, type GameLog, type LogStatus } from '../api/logs'
 import { getErrorMessage } from '../api/errors'
 
 const STATUSES: LogStatus[] = ['Wishlist', 'Backlog', 'Playing', 'Completed', 'Abandoned', 'Replaying']
 
 interface Props {
   igdbId: number
+  /** When provided, the form edits this existing log instead of creating a new one. */
+  existing?: GameLog | null
   onSaved: () => void
   onCancel: () => void
 }
 
-export function LogGameForm({ igdbId, onSaved, onCancel }: Props) {
-  const [status, setStatus] = useState<LogStatus>('Playing')
-  const [rating, setRating] = useState('')
-  const [hoursPlayed, setHoursPlayed] = useState('')
-  const [reviewBody, setReviewBody] = useState('')
+export function LogGameForm({ igdbId, existing, onSaved, onCancel }: Props) {
+  const [status, setStatus] = useState<LogStatus>(existing?.status ?? 'Playing')
+  const [rating, setRating] = useState(existing?.rating != null ? String(existing.rating) : '')
+  const [hoursPlayed, setHoursPlayed] = useState(
+    existing?.hoursPlayed != null ? String(existing.hoursPlayed) : '',
+  )
+  const [reviewBody, setReviewBody] = useState(existing?.reviewBody ?? '')
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+
+  const isEditing = Boolean(existing)
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
     setSaving(true)
+    const payload = {
+      status,
+      rating: rating ? Number(rating) : null,
+      hoursPlayed: hoursPlayed ? Number(hoursPlayed) : null,
+      startedAt: null,
+      finishedAt: null,
+      reviewBody: reviewBody.trim() || null,
+    }
     try {
-      await createLog({
-        igdbId,
-        status,
-        rating: rating ? Number(rating) : null,
-        hoursPlayed: hoursPlayed ? Number(hoursPlayed) : null,
-        startedAt: null,
-        finishedAt: null,
-        reviewBody: reviewBody.trim() || null,
-      })
+      if (existing) {
+        await updateLog(existing.id, payload)
+      } else {
+        await createLog({ igdbId, ...payload })
+      }
       onSaved()
     } catch (err) {
       setError(getErrorMessage(err, 'Could not save the log.'))
@@ -95,7 +105,7 @@ export function LogGameForm({ igdbId, onSaved, onCancel }: Props) {
           disabled={saving}
           className="bg-accent text-base font-medium rounded px-4 py-2 hover:bg-accent-hover transition-colors disabled:opacity-50 cursor-pointer"
         >
-          {saving ? 'Saving…' : 'Save log'}
+          {saving ? 'Saving…' : isEditing ? 'Update log' : 'Save log'}
         </button>
         <button
           type="button"
