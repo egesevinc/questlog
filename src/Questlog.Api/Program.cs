@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Questlog.Api.Auth;
 using Questlog.Api.Middleware;
+using Questlog.Application.Auth;
 using Questlog.Application.Common;
 using Questlog.Infrastructure;
 using Questlog.Infrastructure.Auth;
@@ -91,6 +92,13 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<QuestlogDbContext>();
     db.Database.Migrate();
+
+    // Seed a demo dataset into an empty DB (Development only). No-op if data exists.
+    if (app.Environment.IsDevelopment())
+    {
+        var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
+        await DbSeeder.SeedAsync(db, hasher);
+    }
 }
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
