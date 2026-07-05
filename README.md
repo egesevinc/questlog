@@ -103,8 +103,11 @@ User ──< GameLog >── Game >──< Genre
 | PUT    | `/api/logs/{id}`                     | ✅   | Update a log / its review            |
 | DELETE | `/api/logs/{id}`                     | ✅   | Delete a log                         |
 | GET    | `/api/logs/me`                       | ✅   | The current user's logs              |
+| GET    | `/api/logs/{id}`                     | —    | A single log/review + comments       |
 | POST   | `/api/logs/{id}/like`                | ✅   | Like a log / its review              |
 | DELETE | `/api/logs/{id}/like`                | ✅   | Remove a like                        |
+| POST   | `/api/logs/{id}/comments`            | ✅   | Comment on a log                     |
+| DELETE | `/api/logs/comments/{commentId}`     | ✅   | Delete a comment                     |
 | GET    | `/api/lists/me`                      | ✅   | The current user's lists             |
 | POST   | `/api/lists`                         | ✅   | Create a list                        |
 | GET    | `/api/lists/{id}`                    | —    | A list with its items                |
@@ -168,7 +171,7 @@ dotnet test
 
 Treated as a roadmap, not a to-do — the v1 above is intentionally scoped to ship:
 
-- **Comments on reviews** to round out the social layer (following, an activity feed, and likes already ship — see the API surface).
+- **Notifications** when someone follows you, likes, or comments (the social layer itself — following, feed, likes, and comment threads — already ships; see the API surface).
 - **Clips:** short vertical gameplay clips attached to logs — the long-term vision is a game-native feed where every clip is tied to the game it's from, which a generic video platform can't do.
 - **Richer profiles:** year-in-review, "your gaming taste" summaries.
 - **Caching upgrade:** move the token/game cache to Redis for multi-instance deploys.

@@ -36,8 +36,14 @@ export function ReviewCard({ review }: { review: GameReview }) {
         <p className="text-text text-sm leading-relaxed whitespace-pre-wrap">{review.body}</p>
       )}
 
-      <div className="mt-3">
+      <div className="mt-3 flex items-center gap-4">
         <LikeButton logId={review.logId} initialCount={review.likeCount} initialLiked={review.likedByMe} />
+        <Link
+          to={`/logs/${review.logId}`}
+          className="text-sm text-text-muted hover:text-text transition-colors"
+        >
+          Comment
+        </Link>
       </div>
     </div>
   )

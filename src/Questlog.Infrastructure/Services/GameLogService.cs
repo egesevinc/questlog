@@ -214,6 +214,72 @@ public class GameLogService : IGameLogService
             logCount, ratingCount, reviews);
     }
 
+    public async Task<LogDetailDto?> GetLogDetailAsync(Guid logId, CancellationToken ct = default)
+    {
+        var me = _currentUser.UserId ?? Guid.Empty;
+
+        var detail = await _db.GameLogs
+            .Where(l => l.Id == logId)
+            .Select(l => new
+            {
+                l.Id, l.UserId, Username = l.User.Username,
+                l.Game.IgdbId, GameName = l.Game.Name, l.Game.CoverUrl,
+                l.Status, l.Rating, l.HoursPlayed,
+                ReviewBody = l.Review != null ? l.Review.Body : null,
+                ContainsSpoilers = l.Review != null && l.Review.ContainsSpoilers,
+                l.CreatedAt,
+                LikeCount = _db.LogLikes.Count(x => x.GameLogId == l.Id),
+                LikedByMe = _db.LogLikes.Any(x => x.GameLogId == l.Id && x.UserId == me),
+            })
+            .FirstOrDefaultAsync(ct);
+
+        if (detail is null) return null;
+
+        var comments = await _db.Comments
+            .Where(c => c.GameLogId == logId)
+            .OrderBy(c => c.CreatedAt)
+            .Select(c => new CommentDto(c.Id, c.UserId, c.User.Username, c.Body, c.CreatedAt))
+            .ToListAsync(ct);
+
+        return new LogDetailDto(
+            detail.Id, detail.UserId, detail.Username,
+            detail.IgdbId, detail.GameName, detail.CoverUrl,
+            detail.Status, detail.Rating, detail.HoursPlayed,
+            detail.ReviewBody, detail.ContainsSpoilers, detail.CreatedAt,
+            detail.LikeCount, detail.LikedByMe, comments);
+    }
+
+    public async Task<CommentDto> AddCommentAsync(Guid logId, CreateCommentRequest request, CancellationToken ct = default)
+    {
+        var userId = RequireUserId();
+        if (!await _db.GameLogs.AnyAsync(l => l.Id == logId, ct))
+            throw AppException.NotFound("Log");
+
+        var comment = new Comment { UserId = userId, GameLogId = logId, Body = request.Body.Trim() };
+        _db.Comments.Add(comment);
+        await _db.SaveChangesAsync(ct);
+
+        var username = await _db.Users.Where(u => u.Id == userId).Select(u => u.Username).FirstAsync(ct);
+        return new CommentDto(comment.Id, userId, username, comment.Body, comment.CreatedAt);
+    }
+
+    public async Task<bool> DeleteCommentAsync(Guid commentId, CancellationToken ct = default)
+    {
+        var userId = RequireUserId();
+        var comment = await _db.Comments
+            .Include(c => c.GameLog)
+            .FirstOrDefaultAsync(c => c.Id == commentId, ct);
+        if (comment is null) return false;
+
+        // The comment's author or the log's owner may delete it.
+        if (comment.UserId != userId && comment.GameLog.UserId != userId)
+            throw AppException.Unauthorized("You can't delete this comment.");
+
+        _db.Comments.Remove(comment);
+        await _db.SaveChangesAsync(ct);
+        return true;
+    }
+
     private static void ValidateRating(int? rating)
     {
         if (rating is < 1 or > 10)

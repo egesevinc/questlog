@@ -65,12 +65,18 @@ export function HomePage() {
                     {item.reviewBody}
                   </p>
                 )}
-                <div className="mt-2">
+                <div className="mt-2 flex items-center gap-4">
                   <LikeButton
                     logId={item.logId}
                     initialCount={item.likeCount}
                     initialLiked={item.likedByMe}
                   />
+                  <Link
+                    to={`/logs/${item.logId}`}
+                    className="text-sm text-text-muted hover:text-text transition-colors"
+                  >
+                    Comment
+                  </Link>
                 </div>
               </div>
             </div>

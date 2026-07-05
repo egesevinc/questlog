@@ -29,6 +29,7 @@ public class GameLogServiceTests
         var userId = Guid.NewGuid();
         const long igdbId = 1942;
 
+        db.Users.Add(new User { Id = userId, Username = "tester", Email = "t@x.com", PasswordHash = "h" });
         var game = new Game { IgdbId = igdbId, Name = "The Witcher 3" };
         db.Games.Add(game);
         db.SaveChanges();
@@ -139,5 +140,36 @@ public class GameLogServiceTests
         community.LogCount.Should().Be(0);
         community.AverageRating.Should().BeNull();
         community.Reviews.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task AddComment_appears_in_the_log_detail()
+    {
+        var (svc, _, _, igdbId) = Arrange();
+        var log = await svc.CreateAsync(new CreateGameLogRequest(igdbId, LogStatus.Completed, 9, null, null, null));
+
+        await svc.AddCommentAsync(log.Id, new CreateCommentRequest("Great pick!"));
+
+        var detail = await svc.GetLogDetailAsync(log.Id);
+        detail.Should().NotBeNull();
+        detail!.Comments.Should().HaveCount(1);
+        detail.Comments[0].Body.Should().Be("Great pick!");
+    }
+
+    [Fact]
+    public async Task DeleteComment_by_a_stranger_is_rejected()
+    {
+        var (svc, db, _, igdbId) = Arrange();
+        var log = await svc.CreateAsync(new CreateGameLogRequest(igdbId, LogStatus.Completed, 9, null, null, null));
+        var comment = await svc.AddCommentAsync(log.Id, new CreateCommentRequest("Mine."));
+
+        // A different user tries to delete it.
+        var stranger = Substitute.For<ICurrentUser>();
+        stranger.UserId.Returns(Guid.NewGuid());
+        var strangerSvc = new GameLogService(db, Substitute.For<IGameService>(), stranger);
+
+        var act = () => strangerSvc.DeleteCommentAsync(comment.Id);
+
+        await act.Should().ThrowAsync<AppException>().Where(e => e.StatusCode == 401);
     }
 }

@@ -149,6 +149,11 @@ public static class DbSeeder
             new LogLike { User = zelda, GameLog = linkOot },
             new LogLike { User = link, GameLog = zeldaAlttp });
 
+        // --- Comments: a little back-and-forth under the headline reviews ---
+        db.Comments.AddRange(
+            new Comment { User = zelda, GameLog = linkOot, Body = "The Water Temple slander is unfair, fight me." },
+            new Comment { User = link, GameLog = zeldaAlttp, Body = "Hard agree — the pacing is unmatched." });
+
         await db.SaveChangesAsync(ct);
     }
 }

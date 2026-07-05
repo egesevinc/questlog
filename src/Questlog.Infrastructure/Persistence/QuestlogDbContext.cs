@@ -17,6 +17,7 @@ public class QuestlogDbContext : DbContext
     public DbSet<GameListItem> GameListItems => Set<GameListItem>();
     public DbSet<Follow> Follows => Set<Follow>();
     public DbSet<LogLike> LogLikes => Set<LogLike>();
+    public DbSet<Comment> Comments => Set<Comment>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -119,6 +120,23 @@ public class QuestlogDbContext : DbContext
             e.HasOne(x => x.GameLog)
                 .WithMany()
                 .HasForeignKey(x => x.GameLogId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // --- Comments ---
+        b.Entity<Comment>(e =>
+        {
+            e.Property(c => c.Body).IsRequired().HasMaxLength(2000);
+            e.HasIndex(c => c.GameLogId);
+
+            e.HasOne(c => c.User)
+                .WithMany()
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(c => c.GameLog)
+                .WithMany()
+                .HasForeignKey(c => c.GameLogId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

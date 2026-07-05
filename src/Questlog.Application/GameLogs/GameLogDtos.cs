@@ -46,3 +46,25 @@ public record ProfileStatsDto(
     IReadOnlyList<GenreCountDto> TopGenres);
 
 public record GenreCountDto(string Genre, int Count);
+
+/// <summary>A single log/review, with its author, like info, and comment thread.</summary>
+public record LogDetailDto(
+    Guid Id,
+    Guid UserId,
+    string Username,
+    long IgdbId,
+    string GameName,
+    string? CoverUrl,
+    LogStatus Status,
+    int? Rating,
+    int? HoursPlayed,
+    string? ReviewBody,
+    bool ContainsSpoilers,
+    DateTimeOffset CreatedAt,
+    int LikeCount,
+    bool LikedByMe,
+    IReadOnlyList<CommentDto> Comments);
+
+public record CommentDto(Guid Id, Guid UserId, string Username, string Body, DateTimeOffset CreatedAt);
+
+public record CreateCommentRequest([Required, StringLength(2000, MinimumLength = 1)] string Body);

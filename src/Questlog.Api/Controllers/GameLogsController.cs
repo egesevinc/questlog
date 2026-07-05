@@ -71,4 +71,22 @@ public class GameLogsController : ControllerBase
         await _likes.UnlikeAsync(logId, ct);
         return NoContent();
     }
+
+    /// <summary>A single public log/review with its author, likes, and comments.</summary>
+    [AllowAnonymous]
+    [HttpGet("{logId:guid}")]
+    public async Task<ActionResult<LogDetailDto>> GetDetail(Guid logId, CancellationToken ct)
+    {
+        var detail = await _logs.GetLogDetailAsync(logId, ct);
+        return detail is null ? NotFound() : Ok(detail);
+    }
+
+    /// <summary>Add a comment to a log.</summary>
+    [HttpPost("{logId:guid}/comments")]
+    public async Task<ActionResult<CommentDto>> AddComment(Guid logId, CreateCommentRequest request, CancellationToken ct)
+        => Ok(await _logs.AddCommentAsync(logId, request, ct));
+
+    [HttpDelete("comments/{commentId:guid}")]
+    public async Task<IActionResult> DeleteComment(Guid commentId, CancellationToken ct)
+        => await _logs.DeleteCommentAsync(commentId, ct) ? NoContent() : NotFound();
 }

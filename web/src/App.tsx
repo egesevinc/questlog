@@ -11,6 +11,7 @@ import { ListsPage } from './pages/ListsPage'
 import { ListDetailPage } from './pages/ListDetailPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { UserSearchPage } from './pages/UserSearchPage'
+import { LogDetailPage } from './pages/LogDetailPage'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/games/:igdbId" element={<GameDetailPage />} />
         <Route path="/lists/:listId" element={<ListDetailPage />} />
         <Route path="/profiles/:userId" element={<ProfilePage />} />
+        <Route path="/logs/:logId" element={<LogDetailPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/search" element={<GameSearchPage />} />

@@ -70,3 +70,38 @@ export const getUserLogs = (userId: string) =>
 
 export const getUserStats = (userId: string) =>
   api.get<ProfileStats>(`/api/profiles/${userId}/stats`).then((r) => r.data)
+
+export interface Comment {
+  id: string
+  userId: string
+  username: string
+  body: string
+  createdAt: string
+}
+
+export interface LogDetail {
+  id: string
+  userId: string
+  username: string
+  igdbId: number
+  gameName: string
+  coverUrl: string | null
+  status: LogStatus
+  rating: number | null
+  hoursPlayed: number | null
+  reviewBody: string | null
+  containsSpoilers: boolean
+  createdAt: string
+  likeCount: number
+  likedByMe: boolean
+  comments: Comment[]
+}
+
+export const getLogDetail = (logId: string) =>
+  api.get<LogDetail>(`/api/logs/${logId}`).then((r) => r.data)
+
+export const addComment = (logId: string, body: string) =>
+  api.post<Comment>(`/api/logs/${logId}/comments`, { body }).then((r) => r.data)
+
+export const deleteComment = (commentId: string) =>
+  api.delete(`/api/logs/comments/${commentId}`)
