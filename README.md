@@ -1,5 +1,7 @@
 # Questlog 🎮
 
+[![CI](https://github.com/egesevinc/questlog/actions/workflows/ci.yml/badge.svg)](https://github.com/egesevinc/questlog/actions/workflows/ci.yml)
+
 **Letterboxd, but for games.** Log what you play, rate it, review it, and build lists — backed by a real game database and a clean, production-shaped .NET API.
 
 > I'm a backend engineer, and I kept noticing that film lovers have Letterboxd, but gamers don't have an equivalent that feels good. So I built one as a hobby project — and used it as an excuse to build a properly-architected ASP.NET Core backend end to end: external API integration with caching, JWT auth, a thoughtful relational model, tests, and a one-command Docker setup.
@@ -13,7 +15,7 @@ This is a portfolio project, but it's built like a small real product rather tha
 - **A real external integration done carefully.** Game data comes from [IGDB](https://www.igdb.com/) (Twitch's game database). IGDB authenticates via Twitch OAuth2, blocks browser-origin requests, and rate-limits to 4 req/sec — so the app uses a server-side integration layer that handles token fetch/refresh, throttles outbound calls, and **read-through caches** games into Postgres so repeat lookups never touch IGDB.
 - **A data model shaped for games, not films.** A game isn't watched once — it's played, abandoned, replayed, backlogged, or run for 200 hours. The core `GameLog` entity captures status, rating, hours played, and start/finish dates, with one log per user per game.
 - **Clean architecture.** Domain → Application → Infrastructure → API, with dependencies pointing inward. Services depend on interfaces, not on EF Core or HttpContext, which keeps the core testable.
-- **The unglamorous essentials.** JWT auth, BCrypt password hashing, centralized exception handling, EF Core migrations, meaningful unit tests, and Docker Compose.
+- **The unglamorous essentials.** JWT auth, BCrypt password hashing, centralized exception handling, EF Core migrations, unit **and** HTTP-level integration tests, GitHub Actions CI, and a one-command Docker Compose stack.
 
 ---
 
@@ -55,9 +57,10 @@ This is a portfolio project, but it's built like a small real product rather tha
 | Data        | Entity Framework Core + PostgreSQL       |
 | Auth        | JWT bearer + BCrypt password hashing     |
 | Game data   | IGDB API (Twitch OAuth2)                 |
-| Tests       | xUnit + FluentAssertions + NSubstitute   |
+| Tests       | xUnit + FluentAssertions + NSubstitute + WebApplicationFactory |
+| CI          | GitHub Actions (backend + frontend)      |
 | Infra       | Docker + Docker Compose                  |
-| Frontend    | React (separate, talks to this API)      |
+| Frontend    | React + Vite + TypeScript + Tailwind     |
 
 ---
 
@@ -133,14 +136,16 @@ Full interactive docs via Swagger at `/swagger` in development.
 
 ## Running it
 
-### Option A — Docker (one command)
+### Option A — Docker (one command, full stack)
 
 ```bash
 cp .env.example .env        # then fill in IGDB creds + a JWT secret
 docker compose up --build
 ```
 
-API → http://localhost:8080  ·  Swagger → http://localhost:8080/swagger
+Brings up Postgres, the API, and the built React app together.
+
+Web → http://localhost:5173  ·  API → http://localhost:8080  ·  Swagger → http://localhost:8080/swagger
 
 ### Option B — Local dev
 
@@ -162,8 +167,11 @@ Get IGDB credentials free at the [Twitch developer console](https://dev.twitch.t
 ### Tests
 
 ```bash
-dotnet test
+dotnet test        # unit tests + in-process HTTP integration tests
 ```
+
+Both the backend (build + test) and frontend (typecheck + lint + build) run in
+GitHub Actions on every push — see [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
 ---
 

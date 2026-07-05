@@ -87,11 +87,17 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// --- Apply migrations on startup (handy for demo deploys) ---
+// --- Database setup on startup (handy for demo deploys) ---
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<QuestlogDbContext>();
-    db.Database.Migrate();
+
+    // Migrate against a real (relational) database; for a non-relational provider
+    // — e.g. the in-memory DB used by integration tests — just ensure it's created.
+    if (db.Database.IsRelational())
+        db.Database.Migrate();
+    else
+        db.Database.EnsureCreated();
 
     // Seed a demo dataset into an empty DB (Development only). No-op if data exists.
     if (app.Environment.IsDevelopment())

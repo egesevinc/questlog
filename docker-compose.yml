@@ -32,5 +32,18 @@ services:
     ports:
       - "8080:8080"
 
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        # Where the browser reaches the API (the api service's published port).
+        VITE_API_URL: "http://localhost:8080"
+    depends_on:
+      - api
+    # Served on 5173 to match the API's CORS origin above.
+    ports:
+      - "5173:80"
+
 volumes:
   questlog_pgdata:
