@@ -111,7 +111,10 @@ User ──< GameLog >── Game >──< Genre
 | POST   | `/api/lists/{id}/items`              | ✅   | Add a game to a list                 |
 | DELETE | `/api/lists/{id}/items/{itemId}`     | ✅   | Remove a game from a list            |
 | PUT    | `/api/lists/{id}/items/order`        | ✅   | Reorder a list's items               |
+| GET    | `/api/games/{igdbId}/community`      | —    | A game's avg rating + reviews        |
 | GET    | `/api/profiles/search?q=`            | —    | Find users by username               |
+| GET    | `/api/profiles/{userId}`             | —    | A user's public profile              |
+| PUT    | `/api/profiles/me`                   | ✅   | Update your own bio / avatar         |
 | GET    | `/api/profiles/{userId}/stats`       | —    | Aggregated taste stats               |
 | GET    | `/api/profiles/{userId}/logs`        | —    | A user's public log grid             |
 | GET    | `/api/profiles/{userId}/follow-info` | —    | Follower/following counts            |

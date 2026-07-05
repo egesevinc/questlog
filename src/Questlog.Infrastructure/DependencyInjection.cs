@@ -49,7 +49,7 @@ public static class DependencyInjection
         services.AddScoped<IGameService, GameService>();
         services.AddScoped<IGameLogService, GameLogService>();
         services.AddScoped<IGameListService, GameListService>();
-        services.AddScoped<IUserSearchService, UserSearchService>();
+        services.AddScoped<IUserService, UserService>();
         services.AddScoped<IFollowService, FollowService>();
 
         return services;

@@ -2,24 +2,30 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getUserLogs, getUserStats, type GameLog, type ProfileStats } from '../api/logs'
 import { getFollowInfo, followUser, unfollowUser, type FollowInfo } from '../api/social'
+import { getProfile, type UserProfile } from '../api/users'
+import { ProfileEditForm } from '../components/ProfileEditForm'
 import { useAuth } from '../auth/AuthContext'
 
 export function ProfilePage() {
   const { userId } = useParams<{ userId: string }>()
   const { user } = useAuth()
+  const [profile, setProfile] = useState<UserProfile | null>(null)
   const [stats, setStats] = useState<ProfileStats | null>(null)
   const [logs, setLogs] = useState<GameLog[]>([])
   const [follow, setFollow] = useState<FollowInfo | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [editing, setEditing] = useState(false)
 
   const isMe = user?.userId === userId
 
   useEffect(() => {
     if (!userId) return
     setLoading(true)
-    Promise.all([getUserStats(userId), getUserLogs(userId), getFollowInfo(userId)])
-      .then(([s, l, f]) => {
+    setEditing(false)
+    Promise.all([getProfile(userId), getUserStats(userId), getUserLogs(userId), getFollowInfo(userId)])
+      .then(([p, s, l, f]) => {
+        setProfile(p)
         setStats(s)
         setLogs(l)
         setFollow(f)
@@ -50,21 +56,56 @@ export function ProfilePage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-text">Profile</h1>
+      <div className="flex items-start justify-between mb-4 gap-4">
+        <div className="flex items-center gap-4 min-w-0">
+          <div className="w-16 h-16 shrink-0 rounded-full bg-surface border border-border overflow-hidden flex items-center justify-center">
+            {profile?.avatarUrl ? (
+              <img src={profile.avatarUrl} alt={profile.username} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-2xl text-text-muted">
+                {profile?.username?.[0]?.toUpperCase() ?? '?'}
+              </span>
+            )}
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-2xl font-semibold text-text truncate">
+              {profile?.username ?? 'Profile'}
+            </h1>
+            {profile?.bio && <p className="text-sm text-text-muted mt-1">{profile.bio}</p>}
+          </div>
+        </div>
+        {user && isMe && !editing && (
+          <button
+            onClick={() => setEditing(true)}
+            className="text-sm border border-border rounded px-4 py-1.5 text-text-muted hover:text-text transition-colors cursor-pointer shrink-0"
+          >
+            Edit profile
+          </button>
+        )}
         {user && !isMe && follow && (
           <button
             onClick={toggleFollow}
             className={
               follow.isFollowedByMe
-                ? 'text-sm border border-border rounded px-4 py-1.5 text-text-muted hover:text-text transition-colors cursor-pointer'
-                : 'text-sm bg-accent text-base rounded px-4 py-1.5 font-medium hover:bg-accent-hover transition-colors cursor-pointer'
+                ? 'text-sm border border-border rounded px-4 py-1.5 text-text-muted hover:text-text transition-colors cursor-pointer shrink-0'
+                : 'text-sm bg-accent text-base rounded px-4 py-1.5 font-medium hover:bg-accent-hover transition-colors cursor-pointer shrink-0'
             }
           >
             {follow.isFollowedByMe ? 'Following' : 'Follow'}
           </button>
         )}
       </div>
+
+      {editing && profile && (
+        <ProfileEditForm
+          profile={profile}
+          onSaved={(updated) => {
+            setProfile(updated)
+            setEditing(false)
+          }}
+          onCancel={() => setEditing(false)}
+        />
+      )}
 
       {follow && (
         <div className="flex gap-6 mb-8 text-sm">

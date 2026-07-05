@@ -11,10 +11,10 @@ namespace Questlog.Api.Controllers;
 public class ProfilesController : ControllerBase
 {
     private readonly IGameLogService _logs;
-    private readonly IUserSearchService _users;
+    private readonly IUserService _users;
     private readonly IFollowService _follows;
 
-    public ProfilesController(IGameLogService logs, IUserSearchService users, IFollowService follows)
+    public ProfilesController(IGameLogService logs, IUserService users, IFollowService follows)
     {
         _logs = logs;
         _users = users;
@@ -25,6 +25,20 @@ public class ProfilesController : ControllerBase
     [HttpGet("search")]
     public async Task<ActionResult<IReadOnlyList<UserSummaryDto>>> Search([FromQuery] string q, CancellationToken ct)
         => Ok(await _users.SearchAsync(q, ct));
+
+    /// <summary>Update the current user's own profile (bio, avatar).</summary>
+    [Authorize]
+    [HttpPut("me")]
+    public async Task<ActionResult<UserProfileDto>> UpdateMe(UpdateProfileRequest request, CancellationToken ct)
+        => Ok(await _users.UpdateOwnProfileAsync(request, ct));
+
+    /// <summary>A user's public profile (username, bio, avatar).</summary>
+    [HttpGet("{userId:guid}")]
+    public async Task<ActionResult<UserProfileDto>> Profile(Guid userId, CancellationToken ct)
+    {
+        var profile = await _users.GetProfileAsync(userId, ct);
+        return profile is null ? NotFound() : Ok(profile);
+    }
 
     /// <summary>Aggregated taste stats for a user (counts, avg rating, top genres).</summary>
     [HttpGet("{userId:guid}/stats")]
