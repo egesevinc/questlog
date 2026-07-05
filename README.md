@@ -77,15 +77,17 @@ Secrets (`ClientId` / `ClientSecret`) are never committed; they're read from .NE
 
 ```
 User ──< GameLog >── Game >──< Genre
- │         │           └──< Platform
- │         └── Review (1:1)
- └──< GameList ──< GameListItem >── Game
+ │  │      │           └──< Platform
+ │  │      └── Review (1:1)
+ │  └──< GameList ──< GameListItem >── Game
+ └──< Follow >── User            (self-referencing, follower → followee)
 ```
 
 - **GameLog** — the core: `Status` (Wishlist/Backlog/Playing/Completed/Abandoned/Replaying), `Rating` (1–10, nullable), `HoursPlayed`, `StartedAt`, `FinishedAt`. Unique index on `(UserId, GameId)`.
 - **Game** — a local cache of IGDB metadata with many-to-many genres and platforms.
 - **Review** — one per log, anchored to a specific playthrough.
 - **GameList / GameListItem** — ordered, curated lists.
+- **Follow** — a directed follow edge between two users; unique on `(FollowerId, FolloweeId)`. Powers the activity feed.
 
 ---
 
@@ -112,6 +114,10 @@ User ──< GameLog >── Game >──< Genre
 | GET    | `/api/profiles/search?q=`            | —    | Find users by username               |
 | GET    | `/api/profiles/{userId}/stats`       | —    | Aggregated taste stats               |
 | GET    | `/api/profiles/{userId}/logs`        | —    | A user's public log grid             |
+| GET    | `/api/profiles/{userId}/follow-info` | —    | Follower/following counts            |
+| POST   | `/api/profiles/{userId}/follow`      | ✅   | Follow a user                        |
+| DELETE | `/api/profiles/{userId}/follow`      | ✅   | Unfollow a user                      |
+| GET    | `/api/feed`                          | ✅   | Activity from people you follow      |
 
 Full interactive docs via Swagger at `/swagger` in development.
 
@@ -157,7 +163,7 @@ dotnet test
 
 Treated as a roadmap, not a to-do — the v1 above is intentionally scoped to ship:
 
-- **Social layer:** following, an activity feed, likes on reviews.
+- **Likes & comments on reviews** to round out the social layer (following and an activity feed already ship — see the API surface).
 - **Clips:** short vertical gameplay clips attached to logs — the long-term vision is a game-native feed where every clip is tied to the game it's from, which a generic video platform can't do.
 - **Richer profiles:** year-in-review, "your gaming taste" summaries.
 - **Caching upgrade:** move the token/game cache to Redis for multi-instance deploys.
