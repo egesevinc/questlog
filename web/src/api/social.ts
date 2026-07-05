@@ -18,7 +18,12 @@ export interface FeedItem {
   rating: number | null
   reviewBody: string | null
   createdAt: string
+  likeCount: number
+  likedByMe: boolean
 }
+
+export const likeLog = (logId: string) => api.post(`/api/logs/${logId}/like`)
+export const unlikeLog = (logId: string) => api.delete(`/api/logs/${logId}/like`)
 
 export const getFollowInfo = (userId: string) =>
   api.get<FollowInfo>(`/api/profiles/${userId}/follow-info`).then((r) => r.data)

@@ -77,7 +77,9 @@ public class FollowService : IFollowService
                 l.Game.IgdbId, l.Game.Name, l.Game.CoverUrl,
                 l.Status, l.Rating,
                 l.Review != null ? l.Review.Body : null,
-                l.CreatedAt))
+                l.CreatedAt,
+                _db.LogLikes.Count(x => x.GameLogId == l.Id),
+                _db.LogLikes.Any(x => x.GameLogId == l.Id && x.UserId == userId)))
             .ToListAsync(ct);
     }
 }

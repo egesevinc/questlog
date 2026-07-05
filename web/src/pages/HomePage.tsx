@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { getFeed, type FeedItem } from '../api/social'
+import { LikeButton } from '../components/LikeButton'
 
 export function HomePage() {
   const { user } = useAuth()
@@ -64,6 +65,13 @@ export function HomePage() {
                     {item.reviewBody}
                   </p>
                 )}
+                <div className="mt-2">
+                  <LikeButton
+                    logId={item.logId}
+                    initialCount={item.likeCount}
+                    initialLiked={item.likedByMe}
+                  />
+                </div>
               </div>
             </div>
           ))}

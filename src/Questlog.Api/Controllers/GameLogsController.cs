@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Questlog.Application.Common;
 using Questlog.Application.GameLogs;
+using Questlog.Application.Social;
 
 namespace Questlog.Api.Controllers;
 
@@ -11,11 +12,13 @@ namespace Questlog.Api.Controllers;
 public class GameLogsController : ControllerBase
 {
     private readonly IGameLogService _logs;
+    private readonly ILikeService _likes;
     private readonly ICurrentUser _currentUser;
 
-    public GameLogsController(IGameLogService logs, ICurrentUser currentUser)
+    public GameLogsController(IGameLogService logs, ILikeService likes, ICurrentUser currentUser)
     {
         _logs = logs;
+        _likes = likes;
         _currentUser = currentUser;
     }
 
@@ -52,5 +55,20 @@ public class GameLogsController : ControllerBase
     {
         var log = await _logs.GetMineForGameAsync(igdbId, ct);
         return log is null ? NotFound() : Ok(log);
+    }
+
+    /// <summary>Like a log (and its review).</summary>
+    [HttpPost("{logId:guid}/like")]
+    public async Task<IActionResult> Like(Guid logId, CancellationToken ct)
+    {
+        await _likes.LikeAsync(logId, ct);
+        return NoContent();
+    }
+
+    [HttpDelete("{logId:guid}/like")]
+    public async Task<IActionResult> Unlike(Guid logId, CancellationToken ct)
+    {
+        await _likes.UnlikeAsync(logId, ct);
+        return NoContent();
     }
 }

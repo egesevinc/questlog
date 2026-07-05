@@ -22,10 +22,13 @@ public record GameCommunityDto(
     IReadOnlyList<GameReviewDto> Reviews);
 
 public record GameReviewDto(
+    Guid LogId,
     Guid UserId,
     string Username,
     int? Rating,
     LogStatus Status,
     string Body,
     bool ContainsSpoilers,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    int LikeCount,
+    bool LikedByMe);

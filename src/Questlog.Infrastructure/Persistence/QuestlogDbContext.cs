@@ -16,6 +16,7 @@ public class QuestlogDbContext : DbContext
     public DbSet<GameList> GameLists => Set<GameList>();
     public DbSet<GameListItem> GameListItems => Set<GameListItem>();
     public DbSet<Follow> Follows => Set<Follow>();
+    public DbSet<LogLike> LogLikes => Set<LogLike>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -102,6 +103,22 @@ public class QuestlogDbContext : DbContext
             e.HasOne(f => f.Followee)
                 .WithMany(u => u.Followers)
                 .HasForeignKey(f => f.FolloweeId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // --- Likes: one row per (user, log) ---
+        b.Entity<LogLike>(e =>
+        {
+            e.HasIndex(x => new { x.UserId, x.GameLogId }).IsUnique();
+
+            e.HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(x => x.GameLog)
+                .WithMany()
+                .HasForeignKey(x => x.GameLogId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

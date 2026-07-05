@@ -96,16 +96,22 @@ public static class DbSeeder
         db.Users.AddRange(link, zelda);
 
         // --- Logs (with reviews) ---
-        db.GameLogs.AddRange(
-            new GameLog
+        var linkOot = new GameLog
+        {
+            User = link, Game = oot, Status = LogStatus.Completed, Rating = 10, HoursPlayed = 45,
+            Review = new Review
             {
-                User = link, Game = oot, Status = LogStatus.Completed, Rating = 10, HoursPlayed = 45,
-                Review = new Review
-                {
-                    User = link,
-                    Body = "Still the high-water mark. The Water Temple aged badly but everything else is timeless.",
-                }
-            },
+                User = link,
+                Body = "Still the high-water mark. The Water Temple aged badly but everything else is timeless.",
+            }
+        };
+        var zeldaAlttp = new GameLog
+        {
+            User = zelda, Game = alttp, Status = LogStatus.Completed, Rating = 10, HoursPlayed = 24,
+            Review = new Review { User = zelda, Body = "My favourite in the series. Tight design, no wasted screens." }
+        };
+        db.GameLogs.AddRange(
+            linkOot,
             new GameLog
             {
                 User = link, Game = alttp, Status = LogStatus.Completed, Rating = 9, HoursPlayed = 20,
@@ -113,11 +119,7 @@ public static class DbSeeder
             },
             new GameLog { User = link, Game = loz, Status = LogStatus.Completed, Rating = 8, HoursPlayed = 15 },
             new GameLog { User = link, Game = ages, Status = LogStatus.Playing, Rating = null, HoursPlayed = 6 },
-            new GameLog
-            {
-                User = zelda, Game = alttp, Status = LogStatus.Completed, Rating = 10, HoursPlayed = 24,
-                Review = new Review { User = zelda, Body = "My favourite in the series. Tight design, no wasted screens." }
-            },
+            zeldaAlttp,
             new GameLog { User = zelda, Game = seasons, Status = LogStatus.Completed, Rating = 8, HoursPlayed = 14 },
             new GameLog { User = zelda, Game = zelda2, Status = LogStatus.Abandoned, Rating = 5, HoursPlayed = 4 });
 
@@ -141,6 +143,11 @@ public static class DbSeeder
         db.Follows.AddRange(
             new Follow { Follower = link, Followee = zelda },
             new Follow { Follower = zelda, Followee = link });
+
+        // --- Likes: each demo user likes the other's headline review ---
+        db.LogLikes.AddRange(
+            new LogLike { User = zelda, GameLog = linkOot },
+            new LogLike { User = link, GameLog = zeldaAlttp });
 
         await db.SaveChangesAsync(ct);
     }

@@ -196,13 +196,17 @@ public class GameLogService : IGameLogService
         double? avg = await logs.Where(l => l.Rating != null)
             .Select(l => (double?)l.Rating!.Value).AverageAsync(ct);
 
+        // Empty Guid never matches a real user, so anonymous viewers get LikedByMe = false.
+        var me = _currentUser.UserId ?? Guid.Empty;
         var reviews = await logs
             .Where(l => l.Review != null)
             .OrderByDescending(l => l.CreatedAt)
             .Take(20)
             .Select(l => new GameReviewDto(
-                l.UserId, l.User.Username, l.Rating, l.Status,
-                l.Review!.Body, l.Review.ContainsSpoilers, l.CreatedAt))
+                l.Id, l.UserId, l.User.Username, l.Rating, l.Status,
+                l.Review!.Body, l.Review.ContainsSpoilers, l.CreatedAt,
+                _db.LogLikes.Count(x => x.GameLogId == l.Id),
+                _db.LogLikes.Any(x => x.GameLogId == l.Id && x.UserId == me)))
             .ToListAsync(ct);
 
         return new GameCommunityDto(

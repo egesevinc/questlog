@@ -16,4 +16,6 @@ public record FeedItemDto(
     LogStatus Status,
     int? Rating,
     string? ReviewBody,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    int LikeCount,
+    bool LikedByMe);

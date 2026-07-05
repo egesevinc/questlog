@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { GameReview } from '../api/games'
+import { LikeButton } from './LikeButton'
 
 /** A single community review, with spoiler bodies hidden behind a click. */
 export function ReviewCard({ review }: { review: GameReview }) {
@@ -34,6 +35,10 @@ export function ReviewCard({ review }: { review: GameReview }) {
       ) : (
         <p className="text-text text-sm leading-relaxed whitespace-pre-wrap">{review.body}</p>
       )}
+
+      <div className="mt-3">
+        <LikeButton logId={review.logId} initialCount={review.likeCount} initialLiked={review.likedByMe} />
+      </div>
     </div>
   )
 }

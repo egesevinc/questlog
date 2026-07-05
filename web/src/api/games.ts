@@ -10,6 +10,7 @@ export interface GameSummary {
 }
 
 export interface GameReview {
+  logId: string
   userId: string
   username: string
   rating: number | null
@@ -17,6 +18,8 @@ export interface GameReview {
   body: string
   containsSpoilers: boolean
   createdAt: string
+  likeCount: number
+  likedByMe: boolean
 }
 
 export interface GameCommunity {
