@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Questlog.Application.GameLogs;
 using Questlog.Application.Games;
 
 namespace Questlog.Api.Controllers;
@@ -8,7 +9,13 @@ namespace Questlog.Api.Controllers;
 public class GamesController : ControllerBase
 {
     private readonly IGameService _games;
-    public GamesController(IGameService games) => _games = games;
+    private readonly IGameLogService _logs;
+
+    public GamesController(IGameService games, IGameLogService logs)
+    {
+        _games = games;
+        _logs = logs;
+    }
 
     /// <summary>Search games by name (proxied + cached from IGDB).</summary>
     [HttpGet("search")]
@@ -23,4 +30,9 @@ public class GamesController : ControllerBase
         var game = await _games.GetByIgdbIdAsync(igdbId, ct);
         return game is null ? NotFound() : Ok(game);
     }
+
+    /// <summary>The community view of a game: average rating, counts, recent reviews.</summary>
+    [HttpGet("{igdbId:long}/community")]
+    public async Task<ActionResult<GameCommunityDto>> Community(long igdbId, CancellationToken ct)
+        => Ok(await _logs.GetGameCommunityAsync(igdbId, ct));
 }

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { getGame, type GameDetail } from '../api/games'
+import { getGame, getGameCommunity, type GameDetail, type GameCommunity } from '../api/games'
 import { getMyLists, addListItem, type GameListSummary } from '../api/lists'
 import { getMyLogForGame, deleteLog, type GameLog } from '../api/logs'
 import { useAuth } from '../auth/AuthContext'
 import { LogGameForm } from '../components/LogGameForm'
+import { ReviewCard } from '../components/ReviewCard'
 import { getErrorMessage } from '../api/errors'
 
 export function GameDetailPage() {
@@ -18,6 +19,7 @@ export function GameDetailPage() {
   const [lists, setLists] = useState<GameListSummary[]>([])
   const [addedToList, setAddedToList] = useState<string | null>(null)
   const [listError, setListError] = useState<string | null>(null)
+  const [community, setCommunity] = useState<GameCommunity | null>(null)
 
   useEffect(() => {
     if (!igdbId) return
@@ -26,6 +28,7 @@ export function GameDetailPage() {
       .then(setGame)
       .catch(() => setLoadError('Could not load this game.'))
       .finally(() => setLoading(false))
+    getGameCommunity(Number(igdbId)).then(setCommunity).catch(() => {})
   }, [igdbId])
 
   useEffect(() => {
@@ -34,9 +37,15 @@ export function GameDetailPage() {
     getMyLists().then(setLists).catch(() => {})
   }, [user, igdbId])
 
+  const reloadCommunity = () => {
+    if (!igdbId) return
+    getGameCommunity(Number(igdbId)).then(setCommunity).catch(() => {})
+  }
+
   const reloadLog = () => {
     if (!igdbId) return
     getMyLogForGame(Number(igdbId)).then(setMyLog).catch(() => {})
+    reloadCommunity()
   }
 
   const handleDeleteLog = async () => {
@@ -44,6 +53,7 @@ export function GameDetailPage() {
     await deleteLog(myLog.id)
     setMyLog(null)
     setShowLogForm(false)
+    reloadCommunity()
   }
 
   const handleAddToList = async (listId: string) => {
@@ -75,6 +85,19 @@ export function GameDetailPage() {
         {game.genres.length > 0 && (
           <p className="text-sm text-text-muted mb-4">{game.genres.join(' · ')}</p>
         )}
+
+        {community && community.ratingCount > 0 && (
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-2xl font-semibold text-accent">
+              {community.averageRating?.toFixed(1)}
+            </span>
+            <span className="text-sm text-text-muted">
+              average from {community.ratingCount}{' '}
+              {community.ratingCount === 1 ? 'rating' : 'ratings'} · {community.logCount} logged
+            </span>
+          </div>
+        )}
+
         {game.summary && <p className="text-text mb-6 leading-relaxed">{game.summary}</p>}
 
         {/* No log yet, not editing → offer to log it. */}
@@ -149,6 +172,19 @@ export function GameDetailPage() {
               ))}
             </div>
             {listError && <p className="text-sm text-red-400 mt-2">{listError}</p>}
+          </div>
+        )}
+
+        {community && community.reviews.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-lg font-semibold text-text mb-3">
+              Reviews <span className="text-text-muted font-normal">({community.reviews.length})</span>
+            </h2>
+            <div className="flex flex-col gap-3">
+              {community.reviews.map((review) => (
+                <ReviewCard key={review.userId + review.createdAt} review={review} />
+              ))}
+            </div>
           </div>
         )}
       </div>

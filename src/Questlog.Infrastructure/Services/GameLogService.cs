@@ -183,6 +183,33 @@ public class GameLogService : IGameLogService
             avg.HasValue ? Math.Round(avg.Value, 2) : null, topGenres);
     }
 
+    public async Task<GameCommunityDto> GetGameCommunityAsync(long igdbId, CancellationToken ct = default)
+    {
+        var game = await _db.Games.FirstOrDefaultAsync(g => g.IgdbId == igdbId, ct);
+        if (game is null)
+            return new GameCommunityDto(null, 0, 0, Array.Empty<GameReviewDto>());
+
+        var logs = _db.GameLogs.Where(l => l.GameId == game.Id);
+
+        var logCount = await logs.CountAsync(ct);
+        var ratingCount = await logs.CountAsync(l => l.Rating != null, ct);
+        double? avg = await logs.Where(l => l.Rating != null)
+            .Select(l => (double?)l.Rating!.Value).AverageAsync(ct);
+
+        var reviews = await logs
+            .Where(l => l.Review != null)
+            .OrderByDescending(l => l.CreatedAt)
+            .Take(20)
+            .Select(l => new GameReviewDto(
+                l.UserId, l.User.Username, l.Rating, l.Status,
+                l.Review!.Body, l.Review.ContainsSpoilers, l.CreatedAt))
+            .ToListAsync(ct);
+
+        return new GameCommunityDto(
+            avg.HasValue ? Math.Round(avg.Value, 2) : null,
+            logCount, ratingCount, reviews);
+    }
+
     private static void ValidateRating(int? rating)
     {
         if (rating is < 1 or > 10)

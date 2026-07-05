@@ -1,4 +1,5 @@
 import { api } from './client'
+import type { LogStatus } from './logs'
 
 export interface GameSummary {
   id: string
@@ -6,6 +7,23 @@ export interface GameSummary {
   name: string
   coverUrl: string | null
   releaseDate: string | null
+}
+
+export interface GameReview {
+  userId: string
+  username: string
+  rating: number | null
+  status: LogStatus
+  body: string
+  containsSpoilers: boolean
+  createdAt: string
+}
+
+export interface GameCommunity {
+  averageRating: number | null
+  logCount: number
+  ratingCount: number
+  reviews: GameReview[]
 }
 
 export interface GameDetail {
@@ -24,3 +42,6 @@ export const searchGames = (query: string) =>
 
 export const getGame = (igdbId: number) =>
   api.get<GameDetail>(`/api/games/${igdbId}`).then((r) => r.data)
+
+export const getGameCommunity = (igdbId: number) =>
+  api.get<GameCommunity>(`/api/games/${igdbId}/community`).then((r) => r.data)

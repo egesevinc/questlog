@@ -1,3 +1,5 @@
+using Questlog.Application.Games;
+
 namespace Questlog.Application.GameLogs;
 
 public interface IGameLogService
@@ -10,4 +12,7 @@ public interface IGameLogService
     /// <summary>The current user's log for a given game, or null if they haven't logged it.</summary>
     Task<GameLogDto?> GetMineForGameAsync(long igdbId, CancellationToken ct = default);
     Task<ProfileStatsDto> GetProfileStatsAsync(Guid userId, CancellationToken ct = default);
+
+    /// <summary>Aggregate community view of a game: average rating, counts, and recent reviews.</summary>
+    Task<GameCommunityDto> GetGameCommunityAsync(long igdbId, CancellationToken ct = default);
 }

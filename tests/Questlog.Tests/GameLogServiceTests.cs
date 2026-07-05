@@ -99,4 +99,45 @@ public class GameLogServiceTests
         stats.Playing.Should().Be(1);
         stats.AverageRating.Should().Be(9);
     }
+
+    [Fact]
+    public async Task GetGameCommunity_aggregates_ratings_and_returns_reviews()
+    {
+        var (svc, db, _, igdbId) = Arrange();
+        var game = await db.Games.FirstAsync(g => g.IgdbId == igdbId);
+
+        var a = new User { Username = "a", Email = "a@x.com", PasswordHash = "h" };
+        var b = new User { Username = "b", Email = "b@x.com", PasswordHash = "h" };
+        var c = new User { Username = "c", Email = "c@x.com", PasswordHash = "h" };
+        db.Users.AddRange(a, b, c);
+        db.GameLogs.AddRange(
+            new GameLog
+            {
+                User = a, GameId = game.Id, Status = LogStatus.Completed, Rating = 10,
+                Review = new Review { User = a, Body = "Masterpiece." }
+            },
+            new GameLog { User = b, GameId = game.Id, Status = LogStatus.Completed, Rating = 8 },
+            new GameLog { User = c, GameId = game.Id, Status = LogStatus.Playing, Rating = null });
+        await db.SaveChangesAsync();
+
+        var community = await svc.GetGameCommunityAsync(igdbId);
+
+        community.LogCount.Should().Be(3);
+        community.RatingCount.Should().Be(2);
+        community.AverageRating.Should().Be(9); // (10 + 8) / 2
+        community.Reviews.Should().HaveCount(1);
+        community.Reviews[0].Username.Should().Be("a");
+    }
+
+    [Fact]
+    public async Task GetGameCommunity_returns_empty_for_an_unlogged_game()
+    {
+        var (svc, _, _, igdbId) = Arrange();
+
+        var community = await svc.GetGameCommunityAsync(igdbId);
+
+        community.LogCount.Should().Be(0);
+        community.AverageRating.Should().BeNull();
+        community.Reviews.Should().BeEmpty();
+    }
 }
