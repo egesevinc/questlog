@@ -15,6 +15,7 @@ import { LogDetailPage } from './pages/LogDetailPage'
 import { NotificationsPage } from './pages/NotificationsPage'
 import { YearInReviewPage } from './pages/YearInReviewPage'
 import { DiaryPage } from './pages/DiaryPage'
+import { DiscoverPage } from './pages/DiscoverPage'
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
         <Route path="/profiles/:userId/year-in-review" element={<YearInReviewPage />} />
         <Route path="/profiles/:userId/diary" element={<DiaryPage />} />
         <Route path="/logs/:logId" element={<LogDetailPage />} />
+        <Route path="/discover" element={<DiscoverPage />} />
         {/* Public: shows the landing page when logged out, the feed when logged in. */}
         <Route path="/" element={<HomePage />} />
         <Route element={<ProtectedRoute />}>

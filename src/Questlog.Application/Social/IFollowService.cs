@@ -13,4 +13,7 @@ public interface IFollowService
 
     /// <summary>Recent activity from the users the current user follows, newest first.</summary>
     Task<IReadOnlyList<FeedItemDto>> GetFeedAsync(int limit = 30, CancellationToken ct = default);
+
+    /// <summary>Recent activity from everyone (public discovery feed), newest first.</summary>
+    Task<IReadOnlyList<FeedItemDto>> GetGlobalFeedAsync(int limit = 30, CancellationToken ct = default);
 }

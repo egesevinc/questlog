@@ -341,6 +341,45 @@ public class GameLogService : IGameLogService
         return true;
     }
 
+    public async Task<IReadOnlyList<TrendingGameDto>> GetTrendingGamesAsync(int limit = 12, CancellationToken ct = default)
+    {
+        limit = Math.Clamp(limit, 1, 50);
+
+        // Top games by how many people have logged them.
+        var top = await _db.GameLogs
+            .GroupBy(l => l.GameId)
+            .Select(g => new { GameId = g.Key, LogCount = g.Count() })
+            .OrderByDescending(x => x.LogCount)
+            .Take(limit)
+            .ToListAsync(ct);
+
+        var gameIds = top.Select(t => t.GameId).ToList();
+
+        var games = await _db.Games
+            .Where(g => gameIds.Contains(g.Id))
+            .ToDictionaryAsync(g => g.Id, ct);
+
+        // Averages computed in memory over the small set of these games' ratings,
+        // keeping the query provider-agnostic.
+        var ratings = await _db.GameLogs
+            .Where(l => gameIds.Contains(l.GameId) && l.Rating != null)
+            .Select(l => new { l.GameId, Rating = l.Rating!.Value })
+            .ToListAsync(ct);
+        var avgByGame = ratings
+            .GroupBy(r => r.GameId)
+            .ToDictionary(g => g.Key, g => g.Average(x => x.Rating));
+
+        return top
+            .Where(t => games.ContainsKey(t.GameId))
+            .Select(t =>
+            {
+                var game = games[t.GameId];
+                double? avg = avgByGame.TryGetValue(t.GameId, out var a) ? Math.Round(a, 2) : null;
+                return new TrendingGameDto(game.IgdbId, game.Name, game.CoverUrl, t.LogCount, avg);
+            })
+            .ToList();
+    }
+
     private static void ValidateRating(int? rating)
     {
         if (rating is < 1 or > 10)

@@ -164,6 +164,28 @@ public class GameLogServiceTests
     }
 
     [Fact]
+    public async Task GetTrendingGames_orders_by_log_count()
+    {
+        var (svc, db, _, _) = Arrange();
+        var popular = new Game { IgdbId = 100, Name = "Popular" };
+        var niche = new Game { IgdbId = 200, Name = "Niche" };
+        db.Games.AddRange(popular, niche);
+        // Popular: 3 logs (with two ratings 8 and 10). Niche: 1 log.
+        db.GameLogs.AddRange(
+            new GameLog { UserId = Guid.NewGuid(), GameId = popular.Id, Status = LogStatus.Completed, Rating = 8 },
+            new GameLog { UserId = Guid.NewGuid(), GameId = popular.Id, Status = LogStatus.Completed, Rating = 10 },
+            new GameLog { UserId = Guid.NewGuid(), GameId = popular.Id, Status = LogStatus.Playing },
+            new GameLog { UserId = Guid.NewGuid(), GameId = niche.Id, Status = LogStatus.Completed });
+        await db.SaveChangesAsync();
+
+        var trending = await svc.GetTrendingGamesAsync();
+
+        trending[0].Name.Should().Be("Popular");
+        trending[0].LogCount.Should().Be(3);
+        trending[0].AverageRating.Should().Be(9); // (8 + 10) / 2
+    }
+
+    [Fact]
     public async Task GetGameCommunity_returns_empty_for_an_unlogged_game()
     {
         var (svc, _, _, igdbId) = Arrange();

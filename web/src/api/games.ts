@@ -48,3 +48,14 @@ export const getGame = (igdbId: number) =>
 
 export const getGameCommunity = (igdbId: number) =>
   api.get<GameCommunity>(`/api/games/${igdbId}/community`).then((r) => r.data)
+
+export interface TrendingGame {
+  igdbId: number
+  name: string
+  coverUrl: string | null
+  logCount: number
+  averageRating: number | null
+}
+
+export const getTrendingGames = (limit = 12) =>
+  api.get<TrendingGame[]>('/api/games/trending', { params: { limit } }).then((r) => r.data)

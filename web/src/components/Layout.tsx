@@ -34,6 +34,9 @@ export function Layout() {
           <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
             {user ? (
               <>
+                <Link to="/discover" className="text-text-muted hover:text-text transition-colors">
+                  Discover
+                </Link>
                 <Link to="/search" className="text-text-muted hover:text-text transition-colors">
                   Search
                 </Link>

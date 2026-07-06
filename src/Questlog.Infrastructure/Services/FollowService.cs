@@ -89,4 +89,24 @@ public class FollowService : IFollowService
                 _db.LogLikes.Any(x => x.GameLogId == l.Id && x.UserId == userId)))
             .ToListAsync(ct);
     }
+
+    public async Task<IReadOnlyList<FeedItemDto>> GetGlobalFeedAsync(int limit = 30, CancellationToken ct = default)
+    {
+        limit = Math.Clamp(limit, 1, 100);
+        // Public discovery: anonymous viewers get LikedByMe = false (empty Guid).
+        var me = _currentUser.UserId ?? Guid.Empty;
+
+        return await _db.GameLogs
+            .OrderByDescending(l => l.CreatedAt)
+            .Take(limit)
+            .Select(l => new FeedItemDto(
+                l.Id, l.UserId, l.User.Username,
+                l.Game.IgdbId, l.Game.Name, l.Game.CoverUrl,
+                l.Status, l.Rating,
+                l.Review != null ? l.Review.Body : null,
+                l.CreatedAt,
+                _db.LogLikes.Count(x => x.GameLogId == l.Id),
+                _db.LogLikes.Any(x => x.GameLogId == l.Id && x.UserId == me)))
+            .ToListAsync(ct);
+    }
 }

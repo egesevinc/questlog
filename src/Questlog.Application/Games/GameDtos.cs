@@ -14,6 +14,9 @@ public record GameDetailDto(
     IReadOnlyList<string> Genres,
     IReadOnlyList<string> Platforms);
 
+/// <summary>A trending game: how many people have logged it, and its average rating.</summary>
+public record TrendingGameDto(long IgdbId, string Name, string? CoverUrl, int LogCount, double? AverageRating);
+
 /// <summary>What the whole community thinks of a game: aggregate ratings + recent reviews.</summary>
 public record GameCommunityDto(
     double? AverageRating,

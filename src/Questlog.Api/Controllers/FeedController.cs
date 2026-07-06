@@ -16,4 +16,10 @@ public class FeedController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<FeedItemDto>>> Get([FromQuery] int limit = 30, CancellationToken ct = default)
         => Ok(await _follows.GetFeedAsync(limit, ct));
+
+    /// <summary>Recent activity from everyone (public discovery feed).</summary>
+    [AllowAnonymous]
+    [HttpGet("global")]
+    public async Task<ActionResult<IReadOnlyList<FeedItemDto>>> Global([FromQuery] int limit = 30, CancellationToken ct = default)
+        => Ok(await _follows.GetGlobalFeedAsync(limit, ct));
 }

@@ -34,3 +34,6 @@ export const unfollowUser = (userId: string) => api.delete(`/api/profiles/${user
 
 export const getFeed = (limit = 30) =>
   api.get<FeedItem[]>('/api/feed', { params: { limit } }).then((r) => r.data)
+
+export const getGlobalFeed = (limit = 30) =>
+  api.get<FeedItem[]>('/api/feed/global', { params: { limit } }).then((r) => r.data)

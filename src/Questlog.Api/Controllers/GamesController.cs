@@ -35,4 +35,9 @@ public class GamesController : ControllerBase
     [HttpGet("{igdbId:long}/community")]
     public async Task<ActionResult<GameCommunityDto>> Community(long igdbId, CancellationToken ct)
         => Ok(await _logs.GetGameCommunityAsync(igdbId, ct));
+
+    /// <summary>The most-logged games across all users (for discovery).</summary>
+    [HttpGet("trending")]
+    public async Task<ActionResult<IReadOnlyList<TrendingGameDto>>> Trending([FromQuery] int limit = 12, CancellationToken ct = default)
+        => Ok(await _logs.GetTrendingGamesAsync(limit, ct));
 }
