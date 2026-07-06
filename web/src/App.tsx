@@ -14,6 +14,7 @@ import { UserSearchPage } from './pages/UserSearchPage'
 import { LogDetailPage } from './pages/LogDetailPage'
 import { NotificationsPage } from './pages/NotificationsPage'
 import { YearInReviewPage } from './pages/YearInReviewPage'
+import { DiaryPage } from './pages/DiaryPage'
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/lists/:listId" element={<ListDetailPage />} />
         <Route path="/profiles/:userId" element={<ProfilePage />} />
         <Route path="/profiles/:userId/year-in-review" element={<YearInReviewPage />} />
+        <Route path="/profiles/:userId/diary" element={<DiaryPage />} />
         <Route path="/logs/:logId" element={<LogDetailPage />} />
         {/* Public: shows the landing page when logged out, the feed when logged in. */}
         <Route path="/" element={<HomePage />} />

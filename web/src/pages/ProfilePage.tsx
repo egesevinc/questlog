@@ -137,12 +137,14 @@ export function ProfilePage() {
       )}
 
       {stats.totalLogged > 0 && (
-        <Link
-          to={`/profiles/${userId}/year-in-review`}
-          className="inline-block mb-8 text-sm text-accent hover:underline"
-        >
-          See {new Date().getFullYear()} in review →
-        </Link>
+        <div className="flex gap-4 mb-8 text-sm">
+          <Link to={`/profiles/${userId}/year-in-review`} className="text-accent hover:underline">
+            See {new Date().getFullYear()} in review →
+          </Link>
+          <Link to={`/profiles/${userId}/diary`} className="text-accent hover:underline">
+            Diary →
+          </Link>
+        </div>
       )}
 
       {stats.topGenres.length > 0 && (
