@@ -2,18 +2,21 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getTrendingGames, type TrendingGame } from '../api/games'
 import { getGlobalFeed, type FeedItem } from '../api/social'
+import { getPublicLists, type PublicList } from '../api/lists'
 import { FeedItemCard } from '../components/FeedItemCard'
 
 export function DiscoverPage() {
   const [trending, setTrending] = useState<TrendingGame[]>([])
   const [feed, setFeed] = useState<FeedItem[]>([])
+  const [lists, setLists] = useState<PublicList[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    Promise.all([getTrendingGames(), getGlobalFeed()])
-      .then(([t, f]) => {
+    Promise.all([getTrendingGames(), getGlobalFeed(), getPublicLists()])
+      .then(([t, f, l]) => {
         setTrending(t)
         setFeed(f)
+        setLists(l)
       })
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -51,6 +54,39 @@ export function DiscoverPage() {
                 <p className="text-xs text-text-muted">
                   {game.logCount} {game.logCount === 1 ? 'log' : 'logs'}
                 </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {lists.length > 0 && (
+        <section className="mb-10">
+          <h2 className="text-lg font-semibold text-text mb-4">Popular lists</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {lists.map((list) => (
+              <Link
+                key={list.id}
+                to={`/lists/${list.id}`}
+                className="bg-surface border border-border rounded p-4 hover:border-accent transition-colors flex gap-4"
+              >
+                <div className="flex -space-x-4 shrink-0">
+                  {list.coverUrls.slice(0, 3).map((url, i) => (
+                    <div
+                      key={i}
+                      className="w-10 aspect-[3/4] bg-base border border-border rounded overflow-hidden"
+                      style={{ zIndex: 3 - i }}
+                    >
+                      <img src={url} alt="" className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-text font-medium truncate">{list.title}</p>
+                  <p className="text-xs text-text-muted">
+                    by {list.ownerUsername} · {list.itemCount} games
+                  </p>
+                </div>
               </Link>
             ))}
           </div>

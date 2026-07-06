@@ -82,6 +82,25 @@ public class GameListService : IGameListService
             .ToListAsync(ct);
     }
 
+    public async Task<IReadOnlyList<PublicListDto>> GetPublicListsAsync(int limit = 12, CancellationToken ct = default)
+    {
+        limit = Math.Clamp(limit, 1, 50);
+        return await _db.GameLists
+            .Where(l => l.IsPublic)
+            .OrderByDescending(l => l.CreatedAt)
+            .Take(limit)
+            .Select(l => new PublicListDto(
+                l.Id, l.Title, l.Description, l.UserId, l.User.Username, l.Items.Count,
+                // A few cover thumbnails from the first items, for a preview strip.
+                l.Items.OrderBy(i => i.Order)
+                    .Where(i => i.Game.CoverUrl != null)
+                    .Select(i => i.Game.CoverUrl!)
+                    .Take(4)
+                    .ToList(),
+                l.CreatedAt))
+            .ToListAsync(ct);
+    }
+
     public async Task<GameListDto?> AddItemAsync(Guid listId, AddGameListItemRequest request, CancellationToken ct = default)
     {
         var userId = RequireUserId();

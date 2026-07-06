@@ -27,6 +27,11 @@ public class GameListsController : ControllerBase
         return Ok(await _lists.GetForUserAsync(userId, ct));
     }
 
+    /// <summary>Recent public lists across all users (for discovery).</summary>
+    [HttpGet("discover")]
+    public async Task<ActionResult<IReadOnlyList<PublicListDto>>> Discover([FromQuery] int limit = 12, CancellationToken ct = default)
+        => Ok(await _lists.GetPublicListsAsync(limit, ct));
+
     /// <summary>A single list, with its items.</summary>
     [HttpGet("{listId:guid}")]
     public async Task<ActionResult<GameListDto>> Get(Guid listId, CancellationToken ct)

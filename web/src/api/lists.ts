@@ -36,6 +36,20 @@ export interface CreateGameListRequest {
 
 export const getMyLists = () => api.get<GameListSummary[]>('/api/lists/me').then((r) => r.data)
 
+export interface PublicList {
+  id: string
+  title: string
+  description: string | null
+  ownerId: string
+  ownerUsername: string
+  itemCount: number
+  coverUrls: string[]
+  createdAt: string
+}
+
+export const getPublicLists = (limit = 12) =>
+  api.get<PublicList[]>('/api/lists/discover', { params: { limit } }).then((r) => r.data)
+
 export const getList = (listId: string) =>
   api.get<GameListDetail>(`/api/lists/${listId}`).then((r) => r.data)
 

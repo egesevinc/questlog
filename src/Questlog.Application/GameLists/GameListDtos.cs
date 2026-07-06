@@ -40,3 +40,14 @@ public record GameListSummaryDto(
     bool IsPublic,
     int ItemCount,
     DateTimeOffset CreatedAt);
+
+/// <summary>A public list surfaced for discovery, with its owner and a few cover thumbnails.</summary>
+public record PublicListDto(
+    Guid Id,
+    string Title,
+    string? Description,
+    Guid OwnerId,
+    string OwnerUsername,
+    int ItemCount,
+    IReadOnlyList<string> CoverUrls,
+    DateTimeOffset CreatedAt);
