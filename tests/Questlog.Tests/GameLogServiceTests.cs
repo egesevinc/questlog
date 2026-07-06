@@ -106,6 +106,35 @@ public class GameLogServiceTests
     }
 
     [Fact]
+    public async Task GetYearInReview_only_counts_logs_from_that_year()
+    {
+        var (svc, db, userId, _) = Arrange();
+        var g2 = new Game { IgdbId = 2, Name = "Hades" };
+        var g3 = new Game { IgdbId = 3, Name = "Celeste" };
+        db.Games.AddRange(g2, g3);
+        db.GameLogs.AddRange(
+            new GameLog
+            {
+                UserId = userId, GameId = g2.Id, Status = LogStatus.Completed, Rating = 9,
+                HoursPlayed = 20, CreatedAt = new DateTimeOffset(2025, 5, 1, 0, 0, 0, TimeSpan.Zero)
+            },
+            new GameLog
+            {
+                UserId = userId, GameId = g3.Id, Status = LogStatus.Completed, Rating = 7,
+                HoursPlayed = 5, CreatedAt = new DateTimeOffset(2024, 3, 1, 0, 0, 0, TimeSpan.Zero)
+            });
+        await db.SaveChangesAsync();
+
+        var review = await svc.GetYearInReviewAsync(userId, 2025);
+
+        review.Year.Should().Be(2025);
+        review.TotalLogged.Should().Be(1);
+        review.TotalHoursPlayed.Should().Be(20);
+        review.AverageRating.Should().Be(9);
+        review.TopRated.Should().ContainSingle(g => g.GameName == "Hades");
+    }
+
+    [Fact]
     public async Task GetGameCommunity_aggregates_ratings_and_returns_reviews()
     {
         var (svc, db, _, igdbId) = Arrange();

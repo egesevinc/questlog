@@ -196,6 +196,39 @@ public class GameLogService : IGameLogService
             totalHours, topGenres, distribution);
     }
 
+    public async Task<YearInReviewDto> GetYearInReviewAsync(Guid userId, int year, CancellationToken ct = default)
+    {
+        var logs = _db.GameLogs.Where(l => l.UserId == userId && l.CreatedAt.Year == year);
+
+        var total = await logs.CountAsync(ct);
+        var completed = await logs.CountAsync(l => l.Status == LogStatus.Completed, ct);
+        var totalHours = await logs.SumAsync(l => l.HoursPlayed ?? 0, ct);
+        double? avg = await logs.Where(l => l.Rating != null)
+            .Select(l => (double?)l.Rating!.Value).AverageAsync(ct);
+
+        var genreNames = await logs
+            .SelectMany(l => l.Game.Genres)
+            .Select(g => g.Name)
+            .ToListAsync(ct);
+        var topGenres = genreNames
+            .GroupBy(name => name)
+            .Select(grp => new GenreCountDto(grp.Key, grp.Count()))
+            .OrderByDescending(x => x.Count)
+            .Take(5)
+            .ToList();
+
+        var topRated = await logs
+            .Where(l => l.Rating != null)
+            .OrderByDescending(l => l.Rating)
+            .ThenByDescending(l => l.CreatedAt)
+            .Take(4)
+            .Select(l => new YearGameDto(l.Game.IgdbId, l.Game.Name, l.Game.CoverUrl, l.Rating))
+            .ToListAsync(ct);
+
+        return new YearInReviewDto(year, total, completed, totalHours,
+            avg.HasValue ? Math.Round(avg.Value, 2) : null, topGenres, topRated);
+    }
+
     public async Task<GameCommunityDto> GetGameCommunityAsync(long igdbId, CancellationToken ct = default)
     {
         var game = await _db.Games.FirstOrDefaultAsync(g => g.IgdbId == igdbId, ct);

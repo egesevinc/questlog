@@ -50,6 +50,11 @@ public class ProfilesController : ControllerBase
     public async Task<ActionResult<IReadOnlyList<GameLogDto>>> Logs(Guid userId, CancellationToken ct)
         => Ok(await _logs.GetForUserAsync(userId, ct));
 
+    /// <summary>A user's taste summary for a year (defaults to the current year).</summary>
+    [HttpGet("{userId:guid}/year-in-review")]
+    public async Task<ActionResult<YearInReviewDto>> YearInReview(Guid userId, [FromQuery] int? year, CancellationToken ct)
+        => Ok(await _logs.GetYearInReviewAsync(userId, year ?? DateTimeOffset.UtcNow.Year, ct));
+
     /// <summary>Follow counts and whether the current viewer follows this user.</summary>
     [HttpGet("{userId:guid}/follow-info")]
     public async Task<ActionResult<FollowInfoDto>> FollowInfo(Guid userId, CancellationToken ct)

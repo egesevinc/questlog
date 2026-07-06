@@ -47,6 +47,23 @@ export interface ProfileStats {
   ratingDistribution: number[] // 10 buckets: index 0 = rating 1 ... index 9 = rating 10
 }
 
+export interface YearGame {
+  igdbId: number
+  gameName: string
+  coverUrl: string | null
+  rating: number | null
+}
+
+export interface YearInReview {
+  year: number
+  totalLogged: number
+  completed: number
+  totalHoursPlayed: number
+  averageRating: number | null
+  topGenres: GenreCount[]
+  topRated: YearGame[]
+}
+
 export const createLog = (request: CreateGameLogRequest) =>
   api.post<GameLog>('/api/logs', request).then((r) => r.data)
 
@@ -72,6 +89,11 @@ export const getUserLogs = (userId: string) =>
 
 export const getUserStats = (userId: string) =>
   api.get<ProfileStats>(`/api/profiles/${userId}/stats`).then((r) => r.data)
+
+export const getYearInReview = (userId: string, year?: number) =>
+  api
+    .get<YearInReview>(`/api/profiles/${userId}/year-in-review`, { params: year ? { year } : {} })
+    .then((r) => r.data)
 
 export interface Comment {
   id: string

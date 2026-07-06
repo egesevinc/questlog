@@ -50,6 +50,18 @@ public record ProfileStatsDto(
 
 public record GenreCountDto(string Genre, int Count);
 
+/// <summary>A user's "year in review" — a taste summary for a single calendar year.</summary>
+public record YearInReviewDto(
+    int Year,
+    int TotalLogged,
+    int Completed,
+    int TotalHoursPlayed,
+    double? AverageRating,
+    IReadOnlyList<GenreCountDto> TopGenres,
+    IReadOnlyList<YearGameDto> TopRated);
+
+public record YearGameDto(long IgdbId, string GameName, string? CoverUrl, int? Rating);
+
 /// <summary>A single log/review, with its author, like info, and comment thread.</summary>
 public record LogDetailDto(
     Guid Id,

@@ -16,6 +16,9 @@ public interface IGameLogService
     /// <summary>Aggregate community view of a game: average rating, counts, and recent reviews.</summary>
     Task<GameCommunityDto> GetGameCommunityAsync(long igdbId, CancellationToken ct = default);
 
+    /// <summary>A user's taste summary for a single year (logs created in that year).</summary>
+    Task<YearInReviewDto> GetYearInReviewAsync(Guid userId, int year, CancellationToken ct = default);
+
     /// <summary>A single public log/review with its author, like info, and comments.</summary>
     Task<LogDetailDto?> GetLogDetailAsync(Guid logId, CancellationToken ct = default);
 

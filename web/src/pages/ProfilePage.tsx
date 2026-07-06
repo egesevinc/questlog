@@ -131,9 +131,18 @@ export function ProfilePage() {
       </div>
 
       {stats.ratingDistribution.some((c) => c > 0) && (
-        <div className="mb-8 max-w-md">
+        <div className="mb-6 max-w-md">
           <RatingHistogram distribution={stats.ratingDistribution} />
         </div>
+      )}
+
+      {stats.totalLogged > 0 && (
+        <Link
+          to={`/profiles/${userId}/year-in-review`}
+          className="inline-block mb-8 text-sm text-accent hover:underline"
+        >
+          See {new Date().getFullYear()} in review →
+        </Link>
       )}
 
       {stats.topGenres.length > 0 && (
