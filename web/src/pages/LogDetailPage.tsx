@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getLogDetail, addComment, deleteComment, type LogDetail } from '../api/logs'
 import { LikeButton } from '../components/LikeButton'
+import { ShareButton } from '../components/ShareButton'
 import { useAuth } from '../auth/AuthContext'
 import { getErrorMessage } from '../api/errors'
 
@@ -96,8 +97,9 @@ export function LogDetailPage() {
         </div>
       )}
 
-      <div className="mb-8 pb-6 border-b border-border">
+      <div className="mb-8 pb-6 border-b border-border flex items-center gap-4">
         <LikeButton logId={log.id} initialCount={log.likeCount} initialLiked={log.likedByMe} />
+        <ShareButton sharePath={`logs/${log.id}`} />
       </div>
 
       <h2 className="text-lg font-semibold text-text mb-4">

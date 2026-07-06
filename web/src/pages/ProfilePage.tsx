@@ -6,6 +6,7 @@ import { getProfile, getFavorites, type UserProfile, type FavoriteGame } from '.
 import { ProfileEditForm } from '../components/ProfileEditForm'
 import { FavoritesEditor } from '../components/FavoritesEditor'
 import { RatingHistogram } from '../components/RatingHistogram'
+import { ShareButton } from '../components/ShareButton'
 import { useAuth } from '../auth/AuthContext'
 
 export function ProfilePage() {
@@ -86,26 +87,29 @@ export function ProfilePage() {
             {profile?.bio && <p className="text-sm text-text-muted mt-1">{profile.bio}</p>}
           </div>
         </div>
-        {user && isMe && !editing && (
-          <button
-            onClick={() => setEditing(true)}
-            className="text-sm border border-border rounded px-4 py-1.5 text-text-muted hover:text-text transition-colors cursor-pointer shrink-0"
-          >
-            Edit profile
-          </button>
-        )}
-        {user && !isMe && follow && (
-          <button
-            onClick={toggleFollow}
-            className={
-              follow.isFollowedByMe
-                ? 'text-sm border border-border rounded px-4 py-1.5 text-text-muted hover:text-text transition-colors cursor-pointer shrink-0'
-                : 'text-sm bg-accent text-base rounded px-4 py-1.5 font-medium hover:bg-accent-hover transition-colors cursor-pointer shrink-0'
-            }
-          >
-            {follow.isFollowedByMe ? 'Following' : 'Follow'}
-          </button>
-        )}
+        <div className="flex items-center gap-3 shrink-0">
+          <ShareButton sharePath={`profiles/${userId}`} />
+          {user && isMe && !editing && (
+            <button
+              onClick={() => setEditing(true)}
+              className="text-sm border border-border rounded px-4 py-1.5 text-text-muted hover:text-text transition-colors cursor-pointer"
+            >
+              Edit profile
+            </button>
+          )}
+          {user && !isMe && follow && (
+            <button
+              onClick={toggleFollow}
+              className={
+                follow.isFollowedByMe
+                  ? 'text-sm border border-border rounded px-4 py-1.5 text-text-muted hover:text-text transition-colors cursor-pointer'
+                  : 'text-sm bg-accent text-base rounded px-4 py-1.5 font-medium hover:bg-accent-hover transition-colors cursor-pointer'
+              }
+            >
+              {follow.isFollowedByMe ? 'Following' : 'Follow'}
+            </button>
+          )}
+        </div>
       </div>
 
       {editing && profile && (

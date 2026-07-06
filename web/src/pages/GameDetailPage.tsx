@@ -6,6 +6,7 @@ import { getMyLogForGame, deleteLog, type GameLog } from '../api/logs'
 import { useAuth } from '../auth/AuthContext'
 import { LogGameForm } from '../components/LogGameForm'
 import { ReviewCard } from '../components/ReviewCard'
+import { ShareButton } from '../components/ShareButton'
 import { getErrorMessage } from '../api/errors'
 
 export function GameDetailPage() {
@@ -78,7 +79,12 @@ export function GameDetailPage() {
         ) : null}
       </div>
       <div>
-        <h1 className="text-2xl font-semibold text-text mb-1">{game.name}</h1>
+        <div className="flex items-start justify-between gap-4">
+          <h1 className="text-2xl font-semibold text-text mb-1">{game.name}</h1>
+          <div className="shrink-0 pt-1">
+            <ShareButton sharePath={`games/${game.igdbId}`} />
+          </div>
+        </div>
         {game.releaseDate && (
           <p className="text-text-muted text-sm mb-4">{new Date(game.releaseDate).getFullYear()}</p>
         )}
