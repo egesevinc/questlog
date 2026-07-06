@@ -51,6 +51,7 @@ public static class DependencyInjection
         services.AddScoped<IGameLogService, GameLogService>();
         services.AddScoped<IGameListService, GameListService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IFavoriteService, FavoriteService>();
         services.AddScoped<IFollowService, FollowService>();
         services.AddScoped<ILikeService, LikeService>();
         services.AddScoped<INotificationService, NotificationService>();

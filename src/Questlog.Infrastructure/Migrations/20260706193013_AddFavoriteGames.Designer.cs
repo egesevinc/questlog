@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Questlog.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using Questlog.Infrastructure.Persistence;
 namespace Questlog.Infrastructure.Migrations
 {
     [DbContext(typeof(QuestlogDbContext))]
-    partial class QuestlogDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260706193013_AddFavoriteGames")]
+    partial class AddFavoriteGames
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

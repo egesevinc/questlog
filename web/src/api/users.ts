@@ -26,3 +26,15 @@ export const getProfile = (userId: string) =>
 
 export const updateMyProfile = (request: UpdateProfileRequest) =>
   api.put<UserProfile>('/api/profiles/me', request).then((r) => r.data)
+
+export interface FavoriteGame {
+  igdbId: number
+  gameName: string
+  coverUrl: string | null
+}
+
+export const getFavorites = (userId: string) =>
+  api.get<FavoriteGame[]>(`/api/profiles/${userId}/favorites`).then((r) => r.data)
+
+export const setMyFavorites = (igdbIds: number[]) =>
+  api.put<FavoriteGame[]>('/api/profiles/me/favorites', { igdbIds }).then((r) => r.data)

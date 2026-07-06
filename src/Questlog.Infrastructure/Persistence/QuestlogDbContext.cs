@@ -19,6 +19,7 @@ public class QuestlogDbContext : DbContext
     public DbSet<LogLike> LogLikes => Set<LogLike>();
     public DbSet<Comment> Comments => Set<Comment>();
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<FavoriteGame> FavoriteGames => Set<FavoriteGame>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -139,6 +140,22 @@ public class QuestlogDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(c => c.GameLogId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // --- Favorite games: one row per (user, game) ---
+        b.Entity<FavoriteGame>(e =>
+        {
+            e.HasIndex(f => new { f.UserId, f.GameId }).IsUnique();
+
+            e.HasOne(f => f.User)
+                .WithMany()
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(f => f.Game)
+                .WithMany()
+                .HasForeignKey(f => f.GameId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // --- Notifications ---

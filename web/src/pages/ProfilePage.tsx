@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getUserLogs, getUserStats, type GameLog, type ProfileStats } from '../api/logs'
 import { getFollowInfo, followUser, unfollowUser, type FollowInfo } from '../api/social'
-import { getProfile, type UserProfile } from '../api/users'
+import { getProfile, getFavorites, type UserProfile, type FavoriteGame } from '../api/users'
 import { ProfileEditForm } from '../components/ProfileEditForm'
+import { FavoritesEditor } from '../components/FavoritesEditor'
 import { RatingHistogram } from '../components/RatingHistogram'
 import { useAuth } from '../auth/AuthContext'
 
@@ -14,9 +15,11 @@ export function ProfilePage() {
   const [stats, setStats] = useState<ProfileStats | null>(null)
   const [logs, setLogs] = useState<GameLog[]>([])
   const [follow, setFollow] = useState<FollowInfo | null>(null)
+  const [favorites, setFavorites] = useState<FavoriteGame[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState(false)
+  const [editingFavorites, setEditingFavorites] = useState(false)
 
   const isMe = user?.userId === userId
 
@@ -24,12 +27,20 @@ export function ProfilePage() {
     if (!userId) return
     setLoading(true)
     setEditing(false)
-    Promise.all([getProfile(userId), getUserStats(userId), getUserLogs(userId), getFollowInfo(userId)])
-      .then(([p, s, l, f]) => {
+    setEditingFavorites(false)
+    Promise.all([
+      getProfile(userId),
+      getUserStats(userId),
+      getUserLogs(userId),
+      getFollowInfo(userId),
+      getFavorites(userId),
+    ])
+      .then(([p, s, l, f, fav]) => {
         setProfile(p)
         setStats(s)
         setLogs(l)
         setFollow(f)
+        setFavorites(fav)
       })
       .catch(() => setError('Could not load this profile.'))
       .finally(() => setLoading(false))
@@ -119,6 +130,53 @@ export function ProfilePage() {
             <span className="text-text-muted">following</span>
           </span>
         </div>
+      )}
+
+      {/* Favourite games showcase */}
+      {editingFavorites ? (
+        <FavoritesEditor
+          initial={favorites}
+          onSaved={(fav) => {
+            setFavorites(fav)
+            setEditingFavorites(false)
+          }}
+          onCancel={() => setEditingFavorites(false)}
+        />
+      ) : (
+        (favorites.length > 0 || isMe) && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-text-muted">Favourite games</p>
+              {isMe && (
+                <button
+                  onClick={() => setEditingFavorites(true)}
+                  className="text-xs text-text-muted hover:text-text transition-colors cursor-pointer"
+                >
+                  {favorites.length > 0 ? 'Edit' : 'Add'}
+                </button>
+              )}
+            </div>
+            {favorites.length === 0 ? (
+              <p className="text-sm text-text-muted">No favourites picked yet.</p>
+            ) : (
+              <div className="grid grid-cols-4 gap-3 max-w-md">
+                {favorites.map((f) => (
+                  <Link key={f.igdbId} to={`/games/${f.igdbId}`} className="group">
+                    <div className="aspect-[3/4] bg-surface border border-border rounded overflow-hidden group-hover:border-accent transition-colors">
+                      {f.coverUrl ? (
+                        <img src={f.coverUrl} alt={f.gameName} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-text-muted text-xs px-1 text-center">
+                          {f.gameName}
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        )
       )}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">

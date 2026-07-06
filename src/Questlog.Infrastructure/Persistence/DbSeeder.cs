@@ -154,6 +154,14 @@ public static class DbSeeder
             new Comment { User = zelda, GameLog = linkOot, Body = "The Water Temple slander is unfair, fight me." },
             new Comment { User = link, GameLog = zeldaAlttp, Body = "Hard agree — the pacing is unmatched." });
 
+        // --- Favourite games showcase for each demo user ---
+        db.FavoriteGames.AddRange(
+            new FavoriteGame { User = link, Game = oot, Order = 0 },
+            new FavoriteGame { User = link, Game = alttp, Order = 1 },
+            new FavoriteGame { User = link, Game = loz, Order = 2 },
+            new FavoriteGame { User = zelda, Game = alttp, Order = 0 },
+            new FavoriteGame { User = zelda, Game = seasons, Order = 1 });
+
         // --- Notifications mirroring the seeded interactions (normally created by the
         //     services; seeded directly here since the seed inserts rows directly) ---
         db.Notifications.AddRange(

@@ -13,12 +13,14 @@ public class ProfilesController : ControllerBase
     private readonly IGameLogService _logs;
     private readonly IUserService _users;
     private readonly IFollowService _follows;
+    private readonly IFavoriteService _favorites;
 
-    public ProfilesController(IGameLogService logs, IUserService users, IFollowService follows)
+    public ProfilesController(IGameLogService logs, IUserService users, IFollowService follows, IFavoriteService favorites)
     {
         _logs = logs;
         _users = users;
         _follows = follows;
+        _favorites = favorites;
     }
 
     /// <summary>Find users by username.</summary>
@@ -31,6 +33,17 @@ public class ProfilesController : ControllerBase
     [HttpPut("me")]
     public async Task<ActionResult<UserProfileDto>> UpdateMe(UpdateProfileRequest request, CancellationToken ct)
         => Ok(await _users.UpdateOwnProfileAsync(request, ct));
+
+    /// <summary>A user's pinned favourite games.</summary>
+    [HttpGet("{userId:guid}/favorites")]
+    public async Task<ActionResult<IReadOnlyList<FavoriteGameDto>>> Favorites(Guid userId, CancellationToken ct)
+        => Ok(await _favorites.GetFavoritesAsync(userId, ct));
+
+    /// <summary>Replace the current user's favourites (up to 4 games, in order).</summary>
+    [Authorize]
+    [HttpPut("me/favorites")]
+    public async Task<ActionResult<IReadOnlyList<FavoriteGameDto>>> SetFavorites(SetFavoritesRequest request, CancellationToken ct)
+        => Ok(await _favorites.SetOwnFavoritesAsync(request, ct));
 
     /// <summary>A user's public profile (username, bio, avatar).</summary>
     [HttpGet("{userId:guid}")]
