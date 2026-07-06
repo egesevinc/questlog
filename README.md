@@ -129,6 +129,9 @@ User ──< GameLog >── Game >──< Genre
 | POST   | `/api/profiles/{userId}/follow`      | ✅   | Follow a user                        |
 | DELETE | `/api/profiles/{userId}/follow`      | ✅   | Unfollow a user                      |
 | GET    | `/api/feed`                          | ✅   | Activity from people you follow      |
+| GET    | `/api/notifications`                 | ✅   | Your follow/like/comment notifications |
+| GET    | `/api/notifications/unread-count`    | ✅   | Unread count (for the nav badge)     |
+| POST   | `/api/notifications/read`            | ✅   | Mark all notifications read          |
 
 Full interactive docs via Swagger at `/swagger` in development.
 
@@ -179,7 +182,7 @@ GitHub Actions on every push — see [`.github/workflows/ci.yml`](.github/workfl
 
 Treated as a roadmap, not a to-do — the v1 above is intentionally scoped to ship:
 
-- **Notifications** when someone follows you, likes, or comments (the social layer itself — following, feed, likes, and comment threads — already ships; see the API surface).
+- **Real-time notifications** (push/websockets) — the notification data model and feed already ship (follow/like/comment); this would make the badge update live instead of on navigation.
 - **Clips:** short vertical gameplay clips attached to logs — the long-term vision is a game-native feed where every clip is tied to the game it's from, which a generic video platform can't do.
 - **Richer profiles:** year-in-review, "your gaming taste" summaries.
 - **Caching upgrade:** move the token/game cache to Redis for multi-instance deploys.

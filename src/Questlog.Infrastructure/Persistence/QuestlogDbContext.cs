@@ -18,6 +18,7 @@ public class QuestlogDbContext : DbContext
     public DbSet<Follow> Follows => Set<Follow>();
     public DbSet<LogLike> LogLikes => Set<LogLike>();
     public DbSet<Comment> Comments => Set<Comment>();
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -137,6 +138,28 @@ public class QuestlogDbContext : DbContext
             e.HasOne(c => c.GameLog)
                 .WithMany()
                 .HasForeignKey(c => c.GameLogId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // --- Notifications ---
+        b.Entity<Notification>(e =>
+        {
+            // Fast "my unread notifications, newest first" lookup.
+            e.HasIndex(n => new { n.RecipientId, n.IsRead });
+
+            e.HasOne(n => n.Recipient)
+                .WithMany()
+                .HasForeignKey(n => n.RecipientId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(n => n.Actor)
+                .WithMany()
+                .HasForeignKey(n => n.ActorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(n => n.GameLog)
+                .WithMany()
+                .HasForeignKey(n => n.GameLogId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

@@ -43,6 +43,20 @@ public class FollowServiceTests
     }
 
     [Fact]
+    public async Task FollowAsync_notifies_the_followee()
+    {
+        var (svc, db, me, other) = Arrange();
+
+        await svc.FollowAsync(other.Id);
+
+        var note = await db.Notifications.SingleAsync();
+        note.RecipientId.Should().Be(other.Id);
+        note.ActorId.Should().Be(me.Id);
+        note.Type.Should().Be(NotificationType.Follow);
+        note.IsRead.Should().BeFalse();
+    }
+
+    [Fact]
     public async Task FollowAsync_rejects_self_follow()
     {
         var (svc, _, me, _) = Arrange();

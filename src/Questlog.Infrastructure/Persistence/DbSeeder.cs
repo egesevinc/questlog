@@ -154,6 +154,16 @@ public static class DbSeeder
             new Comment { User = zelda, GameLog = linkOot, Body = "The Water Temple slander is unfair, fight me." },
             new Comment { User = link, GameLog = zeldaAlttp, Body = "Hard agree — the pacing is unmatched." });
 
+        // --- Notifications mirroring the seeded interactions (normally created by the
+        //     services; seeded directly here since the seed inserts rows directly) ---
+        db.Notifications.AddRange(
+            new Notification { Recipient = link, Actor = zelda, Type = NotificationType.Follow },
+            new Notification { Recipient = zelda, Actor = link, Type = NotificationType.Follow },
+            new Notification { Recipient = link, Actor = zelda, Type = NotificationType.Like, GameLog = linkOot },
+            new Notification { Recipient = zelda, Actor = link, Type = NotificationType.Like, GameLog = zeldaAlttp },
+            new Notification { Recipient = link, Actor = zelda, Type = NotificationType.Comment, GameLog = linkOot },
+            new Notification { Recipient = zelda, Actor = link, Type = NotificationType.Comment, GameLog = zeldaAlttp });
+
         await db.SaveChangesAsync(ct);
     }
 }

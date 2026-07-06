@@ -6,6 +6,7 @@ using Questlog.Application.Games;
 using Questlog.Application.GameLists;
 using Questlog.Application.GameLogs;
 using Questlog.Application.Igdb;
+using Questlog.Application.Notifications;
 using Questlog.Application.Social;
 using Questlog.Application.Users;
 using Questlog.Infrastructure.Auth;
@@ -52,6 +53,7 @@ public static class DependencyInjection
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IFollowService, FollowService>();
         services.AddScoped<ILikeService, LikeService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
         return services;
     }

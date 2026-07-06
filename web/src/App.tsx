@@ -12,6 +12,7 @@ import { ListDetailPage } from './pages/ListDetailPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { UserSearchPage } from './pages/UserSearchPage'
 import { LogDetailPage } from './pages/LogDetailPage'
+import { NotificationsPage } from './pages/NotificationsPage'
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
           <Route path="/logs" element={<MyLogsPage />} />
           <Route path="/lists" element={<ListsPage />} />
           <Route path="/people" element={<UserSearchPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
         </Route>
       </Route>
     </Routes>

@@ -1,9 +1,23 @@
-import { Link, Outlet, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { getUnreadCount } from '../api/notifications'
 
 export function Layout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const [unread, setUnread] = useState(0)
+
+  // Refresh the unread badge on login and on every navigation (so visiting the
+  // notifications page, which marks all read, clears the badge on the way out).
+  useEffect(() => {
+    if (!user) {
+      setUnread(0)
+      return
+    }
+    getUnreadCount().then(setUnread).catch(() => {})
+  }, [user, location.pathname])
 
   const handleLogout = () => {
     logout()
@@ -31,6 +45,18 @@ export function Layout() {
                 </Link>
                 <Link to="/people" className="text-text-muted hover:text-text transition-colors">
                   People
+                </Link>
+                <Link
+                  to="/notifications"
+                  className="relative text-text-muted hover:text-text transition-colors"
+                  title="Notifications"
+                >
+                  <span className="text-base leading-none">🔔</span>
+                  {unread > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-accent text-base text-[10px] font-bold rounded-full min-w-4 h-4 px-1 flex items-center justify-center">
+                      {unread > 9 ? '9+' : unread}
+                    </span>
+                  )}
                 </Link>
                 <Link to={`/profiles/${user.userId}`} className="text-text-muted hover:text-text transition-colors">
                   {user.username}

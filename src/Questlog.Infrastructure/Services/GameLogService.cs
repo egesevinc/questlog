@@ -252,11 +252,26 @@ public class GameLogService : IGameLogService
     public async Task<CommentDto> AddCommentAsync(Guid logId, CreateCommentRequest request, CancellationToken ct = default)
     {
         var userId = RequireUserId();
-        if (!await _db.GameLogs.AnyAsync(l => l.Id == logId, ct))
+        var ownerId = await _db.GameLogs.Where(l => l.Id == logId)
+            .Select(l => (Guid?)l.UserId).FirstOrDefaultAsync(ct);
+        if (ownerId is null)
             throw AppException.NotFound("Log");
 
         var comment = new Comment { UserId = userId, GameLogId = logId, Body = request.Body.Trim() };
         _db.Comments.Add(comment);
+
+        // Notify the log's owner — but not for commenting on your own log.
+        if (ownerId.Value != userId)
+        {
+            _db.Notifications.Add(new Notification
+            {
+                RecipientId = ownerId.Value,
+                ActorId = userId,
+                Type = NotificationType.Comment,
+                GameLogId = logId,
+            });
+        }
+
         await _db.SaveChangesAsync(ct);
 
         var username = await _db.Users.Where(u => u.Id == userId).Select(u => u.Username).FirstAsync(ct);

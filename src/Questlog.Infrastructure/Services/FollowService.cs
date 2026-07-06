@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Questlog.Application.Common;
 using Questlog.Application.Social;
 using Questlog.Domain.Entities;
+using Questlog.Domain.Enums;
 using Questlog.Infrastructure.Persistence;
 
 namespace Questlog.Infrastructure.Services;
@@ -33,6 +34,12 @@ public class FollowService : IFollowService
         if (already) return; // idempotent
 
         _db.Follows.Add(new Follow { FollowerId = followerId, FolloweeId = followeeId });
+        _db.Notifications.Add(new Notification
+        {
+            RecipientId = followeeId,
+            ActorId = followerId,
+            Type = NotificationType.Follow,
+        });
         await _db.SaveChangesAsync(ct);
     }
 

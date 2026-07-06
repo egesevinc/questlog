@@ -54,4 +54,37 @@ public class LikeServiceTests
 
         (await db.LogLikes.AnyAsync()).Should().BeFalse();
     }
+
+    [Fact]
+    public async Task LikeAsync_notifies_the_logs_owner()
+    {
+        var (svc, db, meId, log) = Arrange(); // log is authored by someone else
+
+        await svc.LikeAsync(log.Id);
+
+        var note = await db.Notifications.SingleAsync();
+        note.RecipientId.Should().Be(log.UserId);
+        note.ActorId.Should().Be(meId);
+        note.Type.Should().Be(NotificationType.Like);
+        note.GameLogId.Should().Be(log.Id);
+    }
+
+    [Fact]
+    public async Task LikeAsync_does_not_notify_when_liking_your_own_log()
+    {
+        var db = NewDb();
+        var me = new User { Username = "me", Email = "me@x.com", PasswordHash = "h" };
+        var game = new Game { IgdbId = 1, Name = "A" };
+        var myLog = new GameLog { User = me, Game = game, Status = LogStatus.Completed };
+        db.AddRange(me, game, myLog);
+        db.SaveChanges();
+
+        var current = Substitute.For<ICurrentUser>();
+        current.UserId.Returns(me.Id);
+        var svc = new LikeService(db, current);
+
+        await svc.LikeAsync(myLog.Id);
+
+        (await db.Notifications.AnyAsync()).Should().BeFalse();
+    }
 }
