@@ -163,6 +163,18 @@ public class GameLogService : IGameLogService
         double? avg = await logs.Where(l => l.Rating != null)
             .Select(l => (double?)l.Rating!.Value).AverageAsync(ct);
 
+        var totalHours = await logs.SumAsync(l => l.HoursPlayed ?? 0, ct);
+
+        // Rating distribution: 10 buckets (rating 1..10). Counted in memory from
+        // the small set of ratings for simple, provider-agnostic bucketing.
+        var ratings = await logs.Where(l => l.Rating != null)
+            .Select(l => l.Rating!.Value)
+            .ToListAsync(ct);
+        var distribution = new int[10];
+        foreach (var r in ratings)
+            if (r is >= 1 and <= 10)
+                distribution[r - 1]++;
+
         // Top genres across the user's logged games.
         // Grouped in memory: the many-to-many GroupBy can't be translated by
         // every provider (e.g. EF Core's InMemory provider used in tests).
@@ -180,7 +192,8 @@ public class GameLogService : IGameLogService
             .ToList();
 
         return new ProfileStatsDto(total, completed, playing, backlog, abandoned,
-            avg.HasValue ? Math.Round(avg.Value, 2) : null, topGenres);
+            avg.HasValue ? Math.Round(avg.Value, 2) : null,
+            totalHours, topGenres, distribution);
     }
 
     public async Task<GameCommunityDto> GetGameCommunityAsync(long igdbId, CancellationToken ct = default)

@@ -42,7 +42,9 @@ export interface ProfileStats {
   backlog: number
   abandoned: number
   averageRating: number | null
+  totalHoursPlayed: number
   topGenres: GenreCount[]
+  ratingDistribution: number[] // 10 buckets: index 0 = rating 1 ... index 9 = rating 10
 }
 
 export const createLog = (request: CreateGameLogRequest) =>

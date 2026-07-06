@@ -89,8 +89,8 @@ public class GameLogServiceTests
         var g3 = new Game { IgdbId = 3, Name = "Celeste" };
         db.Games.AddRange(g2, g3);
         db.GameLogs.AddRange(
-            new GameLog { UserId = userId, GameId = g2.Id, Status = LogStatus.Completed, Rating = 10 },
-            new GameLog { UserId = userId, GameId = g3.Id, Status = LogStatus.Playing, Rating = 8 });
+            new GameLog { UserId = userId, GameId = g2.Id, Status = LogStatus.Completed, Rating = 10, HoursPlayed = 30 },
+            new GameLog { UserId = userId, GameId = g3.Id, Status = LogStatus.Playing, Rating = 8, HoursPlayed = 12 });
         await db.SaveChangesAsync();
 
         var stats = await svc.GetProfileStatsAsync(userId);
@@ -99,6 +99,10 @@ public class GameLogServiceTests
         stats.Completed.Should().Be(1);
         stats.Playing.Should().Be(1);
         stats.AverageRating.Should().Be(9);
+        stats.TotalHoursPlayed.Should().Be(42);
+        stats.RatingDistribution.Should().HaveCount(10);
+        stats.RatingDistribution[9].Should().Be(1); // one 10/10
+        stats.RatingDistribution[7].Should().Be(1); // one 8/10
     }
 
     [Fact]

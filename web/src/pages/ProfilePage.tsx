@@ -4,6 +4,7 @@ import { getUserLogs, getUserStats, type GameLog, type ProfileStats } from '../a
 import { getFollowInfo, followUser, unfollowUser, type FollowInfo } from '../api/social'
 import { getProfile, type UserProfile } from '../api/users'
 import { ProfileEditForm } from '../components/ProfileEditForm'
+import { RatingHistogram } from '../components/RatingHistogram'
 import { useAuth } from '../auth/AuthContext'
 
 export function ProfilePage() {
@@ -120,13 +121,20 @@ export function ProfilePage() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
         <Stat label="Logged" value={stats.totalLogged} />
         <Stat label="Completed" value={stats.completed} />
         <Stat label="Playing" value={stats.playing} />
         <Stat label="Backlog" value={stats.backlog} />
         <Stat label="Avg rating" value={stats.averageRating ?? '—'} />
+        <Stat label="Hours" value={stats.totalHoursPlayed} />
       </div>
+
+      {stats.ratingDistribution.some((c) => c > 0) && (
+        <div className="mb-8 max-w-md">
+          <RatingHistogram distribution={stats.ratingDistribution} />
+        </div>
+      )}
 
       {stats.topGenres.length > 0 && (
         <div className="mb-8">

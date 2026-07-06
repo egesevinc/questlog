@@ -43,7 +43,10 @@ public record ProfileStatsDto(
     int Backlog,
     int Abandoned,
     double? AverageRating,
-    IReadOnlyList<GenreCountDto> TopGenres);
+    int TotalHoursPlayed,
+    IReadOnlyList<GenreCountDto> TopGenres,
+    // 10 buckets: index 0 = rating 1 ... index 9 = rating 10.
+    IReadOnlyList<int> RatingDistribution);
 
 public record GenreCountDto(string Genre, int Count);
 
