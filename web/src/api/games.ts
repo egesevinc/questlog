@@ -7,6 +7,7 @@ export interface GameSummary {
   name: string
   coverUrl: string | null
   releaseDate: string | null
+  genres: string[]
 }
 
 export interface GameReview {

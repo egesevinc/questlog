@@ -31,13 +31,16 @@ public class GameService : IGameService
         if (string.IsNullOrWhiteSpace(query))
             return Array.Empty<GameSummaryDto>();
 
-        var results = await _igdb.SearchGamesAsync(query, limit: 20, ct);
+        // A larger page gives the client's genre/year filters something to work with.
+        var results = await _igdb.SearchGamesAsync(query, limit: 40, ct);
         var summaries = new List<GameSummaryDto>(results.Count);
 
         foreach (var dto in results)
         {
             var game = await UpsertGameAsync(dto, ct);
-            summaries.Add(new GameSummaryDto(game.Id, game.IgdbId, game.Name, game.CoverUrl, game.ReleaseDate));
+            summaries.Add(new GameSummaryDto(
+                game.Id, game.IgdbId, game.Name, game.CoverUrl, game.ReleaseDate,
+                game.Genres.Select(g => g.Name).ToList()));
         }
 
         await _db.SaveChangesAsync(ct);

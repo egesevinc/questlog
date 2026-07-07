@@ -2,7 +2,9 @@ using Questlog.Domain.Enums;
 
 namespace Questlog.Application.Games;
 
-public record GameSummaryDto(Guid Id, long IgdbId, string Name, string? CoverUrl, DateTimeOffset? ReleaseDate);
+public record GameSummaryDto(
+    Guid Id, long IgdbId, string Name, string? CoverUrl, DateTimeOffset? ReleaseDate,
+    IReadOnlyList<string> Genres);
 
 public record GameDetailDto(
     Guid Id,
