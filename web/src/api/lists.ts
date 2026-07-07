@@ -63,3 +63,6 @@ export const addListItem = (listId: string, igdbId: number, note: string | null 
 
 export const removeListItem = (listId: string, itemId: string) =>
   api.delete(`/api/lists/${listId}/items/${itemId}`)
+
+export const reorderListItems = (listId: string, orderedItemIds: string[]) =>
+  api.put<GameListDetail>(`/api/lists/${listId}/items/order`, { orderedItemIds }).then((r) => r.data)
