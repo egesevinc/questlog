@@ -16,6 +16,7 @@ import { NotificationsPage } from './pages/NotificationsPage'
 import { YearInReviewPage } from './pages/YearInReviewPage'
 import { DiaryPage } from './pages/DiaryPage'
 import { DiscoverPage } from './pages/DiscoverPage'
+import { FollowListPage } from './pages/FollowListPage'
 
 function App() {
   return (
@@ -28,6 +29,8 @@ function App() {
         <Route path="/profiles/:userId" element={<ProfilePage />} />
         <Route path="/profiles/:userId/year-in-review" element={<YearInReviewPage />} />
         <Route path="/profiles/:userId/diary" element={<DiaryPage />} />
+        <Route path="/profiles/:userId/followers" element={<FollowListPage mode="followers" />} />
+        <Route path="/profiles/:userId/following" element={<FollowListPage mode="following" />} />
         <Route path="/logs/:logId" element={<LogDetailPage />} />
         <Route path="/discover" element={<DiscoverPage />} />
         {/* Public: shows the landing page when logged out, the feed when logged in. */}

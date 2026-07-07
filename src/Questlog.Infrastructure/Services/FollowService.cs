@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Questlog.Application.Common;
 using Questlog.Application.Social;
+using Questlog.Application.Users;
 using Questlog.Domain.Entities;
 using Questlog.Domain.Enums;
 using Questlog.Infrastructure.Persistence;
@@ -52,6 +53,24 @@ public class FollowService : IFollowService
 
         _db.Follows.Remove(follow);
         await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<UserSummaryDto>> GetFollowersAsync(Guid userId, CancellationToken ct = default)
+    {
+        return await _db.Follows
+            .Where(f => f.FolloweeId == userId)
+            .OrderByDescending(f => f.CreatedAt)
+            .Select(f => new UserSummaryDto(f.Follower.Id, f.Follower.Username, f.Follower.AvatarUrl))
+            .ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<UserSummaryDto>> GetFollowingAsync(Guid userId, CancellationToken ct = default)
+    {
+        return await _db.Follows
+            .Where(f => f.FollowerId == userId)
+            .OrderByDescending(f => f.CreatedAt)
+            .Select(f => new UserSummaryDto(f.Followee.Id, f.Followee.Username, f.Followee.AvatarUrl))
+            .ToListAsync(ct);
     }
 
     public async Task<FollowInfoDto> GetFollowInfoAsync(Guid userId, CancellationToken ct = default)

@@ -1,7 +1,15 @@
+using Questlog.Application.Users;
+
 namespace Questlog.Application.Social;
 
 public interface IFollowService
 {
+    /// <summary>Users who follow the given user.</summary>
+    Task<IReadOnlyList<UserSummaryDto>> GetFollowersAsync(Guid userId, CancellationToken ct = default);
+
+    /// <summary>Users the given user follows.</summary>
+    Task<IReadOnlyList<UserSummaryDto>> GetFollowingAsync(Guid userId, CancellationToken ct = default);
+
     /// <summary>Follow a user. Idempotent; rejects self-follow.</summary>
     Task FollowAsync(Guid followeeId, CancellationToken ct = default);
 

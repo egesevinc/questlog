@@ -114,6 +114,24 @@ public class FollowServiceTests
     }
 
     [Fact]
+    public async Task GetFollowers_and_GetFollowing_list_the_right_users()
+    {
+        var (svc, _, me, other) = Arrange();
+
+        await svc.FollowAsync(other.Id); // me follows other
+
+        var otherFollowers = await svc.GetFollowersAsync(other.Id);
+        otherFollowers.Should().ContainSingle(u => u.Id == me.Id);
+
+        var myFollowing = await svc.GetFollowingAsync(me.Id);
+        myFollowing.Should().ContainSingle(u => u.Id == other.Id);
+
+        // No cross-contamination.
+        (await svc.GetFollowersAsync(me.Id)).Should().BeEmpty();
+        (await svc.GetFollowingAsync(other.Id)).Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task GetFollowInfoAsync_reports_counts_and_viewer_relationship()
     {
         var (svc, _, _, other) = Arrange();

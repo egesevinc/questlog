@@ -1,5 +1,6 @@
 import { api } from './client'
 import type { LogStatus } from './logs'
+import type { UserSummary } from './users'
 
 export interface FollowInfo {
   followerCount: number
@@ -37,3 +38,9 @@ export const getFeed = (limit = 30) =>
 
 export const getGlobalFeed = (limit = 30) =>
   api.get<FeedItem[]>('/api/feed/global', { params: { limit } }).then((r) => r.data)
+
+export const getFollowers = (userId: string) =>
+  api.get<UserSummary[]>(`/api/profiles/${userId}/followers`).then((r) => r.data)
+
+export const getFollowing = (userId: string) =>
+  api.get<UserSummary[]>(`/api/profiles/${userId}/following`).then((r) => r.data)

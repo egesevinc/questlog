@@ -73,6 +73,16 @@ public class ProfilesController : ControllerBase
     public async Task<ActionResult<FollowInfoDto>> FollowInfo(Guid userId, CancellationToken ct)
         => Ok(await _follows.GetFollowInfoAsync(userId, ct));
 
+    /// <summary>Users who follow this user.</summary>
+    [HttpGet("{userId:guid}/followers")]
+    public async Task<ActionResult<IReadOnlyList<UserSummaryDto>>> Followers(Guid userId, CancellationToken ct)
+        => Ok(await _follows.GetFollowersAsync(userId, ct));
+
+    /// <summary>Users this user follows.</summary>
+    [HttpGet("{userId:guid}/following")]
+    public async Task<ActionResult<IReadOnlyList<UserSummaryDto>>> Following(Guid userId, CancellationToken ct)
+        => Ok(await _follows.GetFollowingAsync(userId, ct));
+
     [Authorize]
     [HttpPost("{userId:guid}/follow")]
     public async Task<IActionResult> Follow(Guid userId, CancellationToken ct)

@@ -125,14 +125,14 @@ export function ProfilePage() {
 
       {follow && (
         <div className="flex gap-6 mb-8 text-sm">
-          <span className="text-text">
+          <Link to={`/profiles/${userId}/followers`} className="text-text hover:text-accent transition-colors">
             <span className="font-semibold">{follow.followerCount}</span>{' '}
             <span className="text-text-muted">followers</span>
-          </span>
-          <span className="text-text">
+          </Link>
+          <Link to={`/profiles/${userId}/following`} className="text-text hover:text-accent transition-colors">
             <span className="font-semibold">{follow.followingCount}</span>{' '}
             <span className="text-text-muted">following</span>
-          </span>
+          </Link>
         </div>
       )}
 
