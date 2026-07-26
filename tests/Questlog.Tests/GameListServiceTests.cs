@@ -82,6 +82,29 @@ public class GameListServiceTests
     }
 
     [Fact]
+    public async Task GetAsync_item_carries_genres_and_community_average_rating()
+    {
+        var db = NewDb();
+        var owner = new User { Username = "o", Email = "o@x.com", PasswordHash = "h" };
+        var rater = new User { Username = "r", Email = "r@x.com", PasswordHash = "h" };
+        var genre = new Genre { IgdbId = 5, Name = "Shooter" };
+        var game = new Game { IgdbId = 42, Name = "G", CachedAt = DateTimeOffset.UtcNow, Genres = { genre } };
+        var list = new GameList { User = owner, Title = "L", Items = { new GameListItem { Game = game, Order = 0 } } };
+        db.AddRange(owner, rater, genre, game, list);
+        // Two ratings (8 and 10) from different users -> community average 9.
+        db.GameLogs.AddRange(
+            new GameLog { User = owner, Game = game, Rating = 8 },
+            new GameLog { User = rater, Game = game, Rating = 10 });
+        await db.SaveChangesAsync();
+
+        var result = await Svc(db).GetAsync(list.Id);
+
+        var item = result!.Items.Should().ContainSingle().Subject;
+        item.Genres.Should().ContainSingle().Which.Should().Be("Shooter");
+        item.AverageRating.Should().Be(9);
+    }
+
+    [Fact]
     public async Task GetPublicLists_returns_only_public_lists_with_owner_and_count()
     {
         var db = NewDb();

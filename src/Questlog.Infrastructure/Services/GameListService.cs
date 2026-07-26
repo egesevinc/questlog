@@ -49,7 +49,7 @@ public class GameListService : IGameListService
         list.UpdatedAt = DateTimeOffset.UtcNow;
 
         await _db.SaveChangesAsync(ct);
-        return ToDto(list);
+        return await GetAsync(listId, ct);
     }
 
     public async Task<bool> DeleteAsync(Guid listId, CancellationToken ct = default)
@@ -67,9 +67,25 @@ public class GameListService : IGameListService
     public async Task<GameListDto?> GetAsync(Guid listId, CancellationToken ct = default)
     {
         var list = await _db.GameLists
-            .Include(l => l.Items).ThenInclude(i => i.Game)
+            .Include(l => l.Items).ThenInclude(i => i.Game).ThenInclude(g => g.Genres)
             .FirstOrDefaultAsync(l => l.Id == listId, ct);
-        return list is null ? null : ToDto(list);
+        if (list is null) return null;
+
+        return ToDto(list, await AverageRatingsAsync(list, ct));
+    }
+
+    /// <summary>Community average rating per game in the list, so the view can show and filter by score.</summary>
+    private async Task<Dictionary<Guid, double>> AverageRatingsAsync(GameList list, CancellationToken ct)
+    {
+        var gameIds = list.Items.Select(i => i.GameId).Distinct().ToList();
+        var ratingRows = await _db.GameLogs
+            .Where(g => gameIds.Contains(g.GameId) && g.Rating != null)
+            .Select(g => new { g.GameId, Rating = g.Rating!.Value })
+            .ToListAsync(ct);
+        // Group in memory: the in-memory provider used by tests can't translate GroupBy+Average.
+        return ratingRows
+            .GroupBy(r => r.GameId)
+            .ToDictionary(gr => gr.Key, gr => Math.Round(gr.Average(x => (double)x.Rating), 1));
     }
 
     public async Task<IReadOnlyList<GameListSummaryDto>> GetForUserAsync(Guid userId, CancellationToken ct = default)
@@ -171,8 +187,10 @@ public class GameListService : IGameListService
         return list;
     }
 
-    private static GameListDto ToDto(GameList l) => new(
+    private static GameListDto ToDto(GameList l, IReadOnlyDictionary<Guid, double>? averages = null) => new(
         l.Id, l.UserId, l.Title, l.Description, l.IsPublic, l.CreatedAt,
         l.Items.OrderBy(i => i.Order).Select(i => new GameListItemDto(
-            i.Id, i.Game.IgdbId, i.Game.Name, i.Game.CoverUrl, i.Order, i.Note)).ToList());
+            i.Id, i.Game.IgdbId, i.Game.Name, i.Game.CoverUrl, i.Order, i.Note,
+            i.Game.Genres.Select(g => g.Name).ToList(),
+            averages != null && averages.TryGetValue(i.GameId, out var avg) ? avg : null)).ToList());
 }
