@@ -41,6 +41,18 @@ public class IgdbClient : IIgdbClient
         var safe = query.Replace("\"", "\\\"");
         var body = $"search \"{safe}\"; {GameFields} limit {limit};";
         var games = await PostGamesAsync(body, ct);
+
+        // IGDB's full-text search wants fairly complete words: "league of lege" returns
+        // nothing even though "League of Legends" exists. When search comes back empty,
+        // fall back to a case-insensitive substring match on the name, ranked by how
+        // widely rated the game is, so partial / mid-typing queries still find hits.
+        if (games.Count == 0)
+        {
+            var fallback =
+                $"{GameFields} where name ~ *\"{safe}\"*; sort total_rating_count desc; limit {limit};";
+            games = await PostGamesAsync(fallback, ct);
+        }
+
         return games;
     }
 
