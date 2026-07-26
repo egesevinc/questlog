@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { searchGames, type GameSummary } from '../api/games'
 
@@ -11,22 +11,46 @@ export function GameSearchPage() {
   const [genre, setGenre] = useState('')
   const [decade, setDecade] = useState('')
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
-    if (!query.trim()) return
+  // Guards against out-of-order responses: only the latest query's result wins.
+  const latestQuery = useRef('')
+
+  const runSearch = async (raw: string) => {
+    const q = raw.trim()
+    if (!q) return
+    latestQuery.current = q
     setError(null)
     setLoading(true)
     setGenre('')
     setDecade('')
     try {
-      const games = await searchGames(query.trim())
+      const games = await searchGames(q)
+      if (latestQuery.current !== q) return // superseded by a newer search
       setResults(games)
       setSearched(true)
     } catch {
-      setError('Search failed. Is the backend running?')
+      if (latestQuery.current === q) setError('Search failed. Is the backend running?')
     } finally {
-      setLoading(false)
+      if (latestQuery.current === q) setLoading(false)
     }
+  }
+
+  // Auto-search as you type: fire ~450ms after you stop, so there's no need to
+  // hit the button. Needs 2+ characters to avoid noisy one-letter queries.
+  useEffect(() => {
+    const q = query.trim()
+    if (q.length < 2) {
+      latestQuery.current = ''
+      setResults([])
+      setSearched(false)
+      return
+    }
+    const handle = setTimeout(() => runSearch(q), 450)
+    return () => clearTimeout(handle)
+  }, [query])
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    runSearch(query)
   }
 
   // Filter options derived from the current results.
@@ -59,7 +83,7 @@ export function GameSearchPage() {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by title…"
+          placeholder="Search by title — results appear as you type…"
           className="flex-1 bg-surface border border-border rounded px-3 py-2 text-text focus:outline-none focus:border-accent"
         />
         <button

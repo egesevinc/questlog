@@ -16,6 +16,8 @@ export interface GameListItem {
   coverUrl: string | null
   order: number
   note: string | null
+  genres: string[]
+  averageRating: number | null
 }
 
 export interface GameListDetail {
@@ -33,6 +35,8 @@ export interface CreateGameListRequest {
   description: string | null
   isPublic: boolean
 }
+
+export type UpdateGameListRequest = CreateGameListRequest
 
 export const getMyLists = () => api.get<GameListSummary[]>('/api/lists/me').then((r) => r.data)
 
@@ -55,6 +59,9 @@ export const getList = (listId: string) =>
 
 export const createList = (request: CreateGameListRequest) =>
   api.post<GameListDetail>('/api/lists', request).then((r) => r.data)
+
+export const updateList = (listId: string, request: UpdateGameListRequest) =>
+  api.put<GameListDetail>(`/api/lists/${listId}`, request).then((r) => r.data)
 
 export const deleteList = (listId: string) => api.delete(`/api/lists/${listId}`)
 

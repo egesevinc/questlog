@@ -22,7 +22,9 @@ public record GameListItemDto(
     string GameName,
     string? CoverUrl,
     int Order,
-    string? Note);
+    string? Note,
+    IReadOnlyList<string> Genres,
+    double? AverageRating);
 
 public record GameListDto(
     Guid Id,

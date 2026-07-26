@@ -154,7 +154,7 @@ export function ProfilePage() {
               {isMe && (
                 <button
                   onClick={() => setEditingFavorites(true)}
-                  className="text-xs text-text-muted hover:text-text transition-colors cursor-pointer"
+                  className="text-xs text-accent hover:underline transition-colors cursor-pointer"
                 >
                   {favorites.length > 0 ? 'Edit' : 'Add'}
                 </button>

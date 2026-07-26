@@ -27,6 +27,13 @@ public class GameListServiceTests
         return new GameListService(db, Substitute.For<IGameService>(), current);
     }
 
+    private static GameListService SvcWith(QuestlogDbContext db, IGameService games, Guid userId)
+    {
+        var current = Substitute.For<ICurrentUser>();
+        current.UserId.Returns(userId);
+        return new GameListService(db, games, current);
+    }
+
     [Fact]
     public async Task ReorderItems_applies_the_new_order()
     {
@@ -48,6 +55,53 @@ public class GameListServiceTests
                 new[] { i3.Id, i2.Id, i1.Id }));
 
         result!.Items.Select(i => i.GameName).Should().ContainInOrder("Three", "Two", "One");
+    }
+
+    [Fact]
+    public async Task AddItem_adds_a_cached_game_to_the_list()
+    {
+        var db = NewDb();
+        var owner = new User { Username = "o", Email = "o@x.com", PasswordHash = "h" };
+        var game = new Game { IgdbId = 99, Name = "X", CachedAt = DateTimeOffset.UtcNow };
+        var list = new GameList { User = owner, Title = "L" };
+        db.AddRange(owner, game, list);
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+
+        var igdb = Substitute.For<Questlog.Application.Igdb.IIgdbClient>();
+        var games = new GameService(db, igdb);
+        var svc = SvcWith(db, games, owner.Id);
+
+        // Regression: adding through a tracked list's navigation used to mark the
+        // new item Modified (BaseEntity pre-generates a Guid Id), which crashed
+        // SaveChanges with a concurrency error.
+        var result = await svc.AddItemAsync(
+            list.Id, new Questlog.Application.GameLists.AddGameListItemRequest(99, null));
+
+        result!.Items.Should().ContainSingle().Which.IgdbId.Should().Be(99);
+    }
+
+    [Fact]
+    public async Task GetAsync_item_carries_genres_and_community_average_rating()
+    {
+        var db = NewDb();
+        var owner = new User { Username = "o", Email = "o@x.com", PasswordHash = "h" };
+        var rater = new User { Username = "r", Email = "r@x.com", PasswordHash = "h" };
+        var genre = new Genre { IgdbId = 5, Name = "Shooter" };
+        var game = new Game { IgdbId = 42, Name = "G", CachedAt = DateTimeOffset.UtcNow, Genres = { genre } };
+        var list = new GameList { User = owner, Title = "L", Items = { new GameListItem { Game = game, Order = 0 } } };
+        db.AddRange(owner, rater, genre, game, list);
+        // Two ratings (8 and 10) from different users -> community average 9.
+        db.GameLogs.AddRange(
+            new GameLog { User = owner, Game = game, Rating = 8 },
+            new GameLog { User = rater, Game = game, Rating = 10 });
+        await db.SaveChangesAsync();
+
+        var result = await Svc(db).GetAsync(list.Id);
+
+        var item = result!.Items.Should().ContainSingle().Subject;
+        item.Genres.Should().ContainSingle().Which.Should().Be("Shooter");
+        item.AverageRating.Should().Be(9);
     }
 
     [Fact]
