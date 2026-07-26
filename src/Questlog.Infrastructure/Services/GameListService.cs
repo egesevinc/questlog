@@ -115,7 +115,11 @@ public class GameListService : IGameListService
             throw AppException.Conflict("This game is already in the list.");
 
         var nextOrder = list.Items.Count == 0 ? 0 : list.Items.Max(i => i.Order) + 1;
-        list.Items.Add(new GameListItem
+        // Add through the DbSet, not list.Items, so EF marks the row Added. Because
+        // BaseEntity pre-generates a Guid Id, adding via the tracked parent's
+        // navigation makes EF treat the client-set key as an existing row and mark
+        // it Modified — which then fails SaveChanges with a concurrency error.
+        _db.GameListItems.Add(new GameListItem
         {
             GameListId = list.Id,
             GameId = game.Id,

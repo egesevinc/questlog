@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -52,7 +53,11 @@ builder.Services.AddCors(options =>
         .AllowAnyHeader()
         .AllowAnyMethod()));
 
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+    // Serialize/accept enums as their string names ("Completed"), not integers, so
+    // the JSON contract matches the TypeScript string-literal union types on the client.
+    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 // Return model-validation failures in the same { status, detail } shape as
 // ExceptionHandlingMiddleware, so the client has a single error contract.
