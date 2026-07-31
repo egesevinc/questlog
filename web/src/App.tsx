@@ -17,6 +17,7 @@ import { YearInReviewPage } from './pages/YearInReviewPage'
 import { DiaryPage } from './pages/DiaryPage'
 import { DiscoverPage } from './pages/DiscoverPage'
 import { FollowListPage } from './pages/FollowListPage'
+import { ComparePage } from './pages/ComparePage'
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/search" element={<GameSearchPage />} />
+          <Route path="/compare" element={<ComparePage />} />
           <Route path="/logs" element={<MyLogsPage />} />
           <Route path="/lists" element={<ListsPage />} />
           <Route path="/people" element={<UserSearchPage />} />

@@ -40,6 +40,9 @@ export function Layout() {
                 <Link to="/search" className="text-text-muted hover:text-text transition-colors">
                   Search
                 </Link>
+                <Link to="/compare" className="text-text-muted hover:text-text transition-colors">
+                  Compare
+                </Link>
                 <Link to="/logs" className="text-text-muted hover:text-text transition-colors">
                   My Logs
                 </Link>

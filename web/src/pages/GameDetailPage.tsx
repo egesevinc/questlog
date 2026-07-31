@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { getGame, getGameCommunity, type GameDetail, type GameCommunity } from '../api/games'
 import { getMyLists, addListItem, type GameListSummary } from '../api/lists'
 import { getMyLogForGame, deleteLog, type GameLog } from '../api/logs'
@@ -81,7 +81,13 @@ export function GameDetailPage() {
       <div>
         <div className="flex items-start justify-between gap-4">
           <h1 className="text-2xl font-semibold text-text mb-1">{game.name}</h1>
-          <div className="shrink-0 pt-1">
+          <div className="shrink-0 pt-1 flex items-center gap-3">
+            <Link
+              to={`/compare?a=${game.igdbId}`}
+              className="text-sm text-text-muted hover:text-accent transition-colors"
+            >
+              Compare
+            </Link>
             <ShareButton sharePath={`games/${game.igdbId}`} />
           </div>
         </div>
