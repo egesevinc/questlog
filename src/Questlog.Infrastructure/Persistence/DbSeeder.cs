@@ -115,7 +115,7 @@ public static class DbSeeder
             new GameLog
             {
                 User = link, Game = alttp, Status = LogStatus.Completed, Rating = 9, HoursPlayed = 20,
-                Review = new Review { User = link, Body = "The dark world twist is one of the great mid-game reveals." }
+                Review = new Review { User = link, Body = "The dark world twist is one of the great mid-game reveals.", ContainsSpoilers = true }
             },
             new GameLog { User = link, Game = loz, Status = LogStatus.Completed, Rating = 8, HoursPlayed = 15 },
             new GameLog { User = link, Game = ages, Status = LogStatus.Playing, Rating = null, HoursPlayed = 6 },

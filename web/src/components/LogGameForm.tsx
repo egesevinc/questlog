@@ -19,6 +19,7 @@ export function LogGameForm({ igdbId, existing, onSaved, onCancel }: Props) {
     existing?.hoursPlayed != null ? String(existing.hoursPlayed) : '',
   )
   const [reviewBody, setReviewBody] = useState(existing?.reviewBody ?? '')
+  const [containsSpoilers, setContainsSpoilers] = useState(existing?.containsSpoilers ?? false)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
@@ -35,6 +36,7 @@ export function LogGameForm({ igdbId, existing, onSaved, onCancel }: Props) {
       startedAt: null,
       finishedAt: null,
       reviewBody: reviewBody.trim() || null,
+      containsSpoilers,
     }
     try {
       if (existing) {
@@ -98,6 +100,15 @@ export function LogGameForm({ igdbId, existing, onSaved, onCancel }: Props) {
           className="bg-base border border-border rounded px-3 py-2 text-text focus:outline-none focus:border-accent resize-none"
         />
       </div>
+      <label className="flex items-center gap-2 text-sm text-text-muted cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={containsSpoilers}
+          onChange={(e) => setContainsSpoilers(e.target.checked)}
+          className="accent-accent w-4 h-4 cursor-pointer"
+        />
+        This review contains spoilers
+      </label>
       {error && <p className="text-sm text-red-400">{error}</p>}
       <div className="flex gap-2">
         <button
