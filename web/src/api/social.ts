@@ -18,6 +18,7 @@ export interface FeedItem {
   status: LogStatus
   rating: number | null
   reviewBody: string | null
+  containsSpoilers: boolean
   createdAt: string
   likeCount: number
   likedByMe: boolean

@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { FeedItem } from '../api/social'
 import { LikeButton } from './LikeButton'
 
 /** One activity-feed entry: who did what to which game, with like + comment actions. */
 export function FeedItemCard({ item }: { item: FeedItem }) {
+  const [revealed, setRevealed] = useState(false)
+  const hideReview = item.containsSpoilers && !revealed
   return (
     <div className="flex gap-4 bg-surface border border-border rounded p-4">
       <Link to={`/games/${item.igdbId}`} className="shrink-0">
@@ -24,9 +27,17 @@ export function FeedItemCard({ item }: { item: FeedItem }) {
           </Link>
           {item.rating != null && <span className="text-accent font-semibold"> · {item.rating}/10</span>}
         </p>
-        {item.reviewBody && (
-          <p className="text-sm text-text-muted mt-1 line-clamp-3 whitespace-pre-wrap">{item.reviewBody}</p>
-        )}
+        {item.reviewBody &&
+          (hideReview ? (
+            <button
+              onClick={() => setRevealed(true)}
+              className="block text-sm text-text-muted italic mt-1 hover:text-text transition-colors cursor-pointer text-left"
+            >
+              Contains spoilers — click to reveal
+            </button>
+          ) : (
+            <p className="text-sm text-text-muted mt-1 line-clamp-3 whitespace-pre-wrap">{item.reviewBody}</p>
+          ))}
         <div className="mt-2 flex items-center gap-4">
           <LikeButton logId={item.logId} initialCount={item.likeCount} initialLiked={item.likedByMe} />
           <Link to={`/logs/${item.logId}`} className="text-sm text-text-muted hover:text-text transition-colors">
