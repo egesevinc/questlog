@@ -8,7 +8,7 @@ export function RatingHistogram({ distribution }: { distribution: number[] }) {
   return (
     <div>
       <p className="text-sm text-text-muted mb-2">Rating distribution</p>
-      <div className="flex items-end gap-1 h-24">
+      <div className="flex items-stretch gap-1 h-24">
         {distribution.map((count, i) => (
           <div key={i} className="flex-1 flex flex-col items-center gap-1">
             <div className="w-full flex-1 flex items-end">
